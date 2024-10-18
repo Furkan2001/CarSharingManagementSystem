@@ -1,6 +1,0 @@
-@CarSharing_HostAddress = http://localhost:5162
-
-GET {{CarSharing_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
