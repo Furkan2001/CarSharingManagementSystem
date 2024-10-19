@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Impl\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CarSharingManagementSystem.DataAccess\CarSharingManagementSystem.DataAccess.csproj" />
+    <ProjectReference Include="..\CarSharingManagementSystem.Entities\CarSharingManagementSystem.Entities.csproj" />
+  </ItemGroup>
+
+</Project>

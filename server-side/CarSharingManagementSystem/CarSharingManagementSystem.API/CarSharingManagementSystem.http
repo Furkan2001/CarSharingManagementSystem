@@ -1,0 +1,6 @@
+@CarSharingManagementSystem_HostAddress = http://localhost:5158
+
+GET {{CarSharingManagementSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
