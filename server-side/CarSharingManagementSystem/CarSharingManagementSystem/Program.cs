@@ -1,26 +1,33 @@
 ﻿var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply CORS globally
+app.UseCors("AllowAllOrigins");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Ensure CORS middleware is used before Authorization
 app.UseAuthorization();
 
-// HTTPS yönlendirme middleware'ini kaldır
-//app.UseHttpsRedirection();
-
-app.MapControllers(); // Controller'ları eklemek için gerekli satır
-
+app.MapControllers();
 app.Run();

@@ -14,8 +14,11 @@ namespace CarSharingManagementSystem.Controllers
             var journeys = new[]
             {
                 new { Id = 1, UserName = "Esat", Beginning = "Gtü", Destination = "Kartal", Time = "15:00" },
-                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
+                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" },
+                new { Id = 3, UserName = "Enes", Beginning = "Gtü", Destination = "Gebze", Time = "17:00" }
             };
+
+            //Response.Headers.Add("Access-Control-Allow-Origin", "*");
             return Ok(journeys);
         }
 
@@ -26,8 +29,10 @@ namespace CarSharingManagementSystem.Controllers
             var journeys = new[]
             {
                 new { Id = 1, UserName = "Esat", Beginning = "Gtü", Destination = "Kartal", Time = "15:00" },
-                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
+                new { Id = 2, UserName = "Esat", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
             };
+
+            //Response.Headers.Add("Access-Control-Allow-Origin", "*");
             return Ok(journeys);
         }
 
@@ -42,14 +47,9 @@ namespace CarSharingManagementSystem.Controllers
                 Beginning = "Gtü",
                 Destination = "Kartal",
                 Time = "15:00",
-                Path = new[]
-                {
-                    new { Town = "Gebze" },
-                    new { Town = "Tuzla" },
-                    new { Town = "Pendik" },
-                    new { Town = "Kartal" }
-                }
             };
+
+            //Response.Headers.Add("Access-Control-Allow-Origin", "*");
             return Ok(journey);
         }
 
@@ -83,6 +83,7 @@ namespace CarSharingManagementSystem.Controllers
             {
                 new {Bool = "True"}
             };
+
             return Ok(result);
         }
 

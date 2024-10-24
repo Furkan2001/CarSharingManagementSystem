@@ -1,50 +1,76 @@
 import 'package:flutter/material.dart';
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
-import 'post_screen.dart';
+import '../screens/post_screen.dart';
 
-class VehiclePostsScreen extends StatelessWidget {
+
+class VehiclePostsScreen extends StatefulWidget {
   const VehiclePostsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> posts = PostsService.getPosts();
+  _VehiclePostsScreenState createState() => _VehiclePostsScreenState();
+}
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Araç Paylaşımları'),
-      ),
-      drawer: const Menu(),
-      body: _buildPostsList(context, posts),
-    );
+class _VehiclePostsScreenState extends State<VehiclePostsScreen> {
+  List<dynamic> _journeys = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJourneys();
   }
 
-  
-  Widget _buildPostsList(BuildContext context, List<Map<String, String>> posts) {
-    return ListView.builder(
-      itemCount: posts.length,
-      itemBuilder: (context, index) {
-        final post = posts[index];
-        return Card(
-          margin: const EdgeInsets.all(8.0),
-          child: ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.directions_car),
+  Future<void> _fetchJourneys() async {
+    try {
+      final journeys = await PostsService.getAllJourneys();
+      setState(() {
+        _journeys = journeys;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching journeys: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Vehicle Sharing Posts'),
+      ),
+      drawer: const Menu(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _journeys.length,
+              itemBuilder: (context, index) {
+                final journey = _journeys[index];
+
+                // Handle possible null values
+                final beginning = journey['beginning'] ?? 'Unknown';
+                final destination = journey['destination'] ?? 'Unknown';
+                final time = journey['time'] ?? 'N/A';
+                final id = journey['Id'] ?? -1;
+
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    leading: const Icon(Icons.directions_car),
+                    title: Text('$beginning → $destination'),
+                    subtitle: Text('Time: $time'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostScreen(journeyId: id),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
-            title: Text(post['destination']!),
-            subtitle: Text('Kalkış: ${post['departure']}'),
-            onTap: () {
-              
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PostScreen(post: post),
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

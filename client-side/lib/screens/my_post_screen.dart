@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../services/posts_service.dart';
 
 class MyPostScreen extends StatefulWidget {
-  final Map<String, String> post;
+  final Map<String, dynamic> post;
   final int index;
-  final Function(int, Map<String, String>) updatePost;
+  final Function(int, Map<String, dynamic>) updatePost;
 
   const MyPostScreen({
     Key? key,
@@ -20,13 +21,17 @@ class _MyPostScreenState extends State<MyPostScreen> {
   late TextEditingController _departurePlaceController;
   late TextEditingController _destinationController;
   late TextEditingController _departureTimeController;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _departurePlaceController = TextEditingController(text: widget.post['departure place']);
-    _destinationController = TextEditingController(text: widget.post['destination']);
-    _departureTimeController = TextEditingController(text: widget.post['departure']);
+    _departurePlaceController =
+        TextEditingController(text: widget.post['beginning']);
+    _destinationController =
+        TextEditingController(text: widget.post['destination']);
+    _departureTimeController =
+        TextEditingController(text: widget.post['time']);
   }
 
   @override
@@ -37,21 +42,44 @@ class _MyPostScreenState extends State<MyPostScreen> {
     super.dispose();
   }
 
-  void _saveChanges() {
+  void _saveChanges() async{
     final updatedPost = {
-      'name': widget.post['name']!,
-      'departure place': _departurePlaceController.text,
+      'id': widget.post['id'],
+      'name': widget.post['name'],
+      'beginning': _departurePlaceController.text,
       'destination': _destinationController.text,
-      'departure': _departureTimeController.text,
+      'time': _departureTimeController.text,
     };
 
-    widget.updatePost(widget.index, updatedPost);
+    try {
+      // Call the update API
+      bool success = await PostsService.updateJourney(widget.post['id'], updatedPost);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Paylaşım başarıyla güncellendi!')),
-    );
+      if (success) {
+        widget.updatePost(widget.index, updatedPost);
 
-    Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Paylaşım başarıyla güncellendi!')),
+        );
+
+        Navigator.pop(context, updatedPost);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Güncelleme başarısız oldu.')),
+        );
+      }
+    } catch (e) {
+      print('Error updating post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bir hata oluştu.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    
   }
 
   @override
@@ -60,41 +88,43 @@ class _MyPostScreenState extends State<MyPostScreen> {
       appBar: AppBar(
         title: const Text('Paylaşımı düzenleyin'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _departurePlaceController,
-              decoration: const InputDecoration(
-                labelText: 'Kalkış Yeri',
-                border: OutlineInputBorder(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _departurePlaceController,
+                    decoration: const InputDecoration(
+                    labelText: 'Kalkış Yeri',
+                    border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _destinationController,
-              decoration: const InputDecoration(
-                labelText: 'Hedef',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _destinationController,
+                decoration: const InputDecoration(
+                  labelText: 'Hedef',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _departureTimeController,
-              decoration: const InputDecoration(
-                labelText: 'Kalkış Saati',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16.0),
+              TextFormField(
+                controller: _departureTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Kalkış Saati',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: _saveChanges,
-              child: const Text('Değişiklikleri kaydet'),
-            ),
-          ],
+              const SizedBox(height: 24.0),
+              ElevatedButton(
+                onPressed: _saveChanges,
+                child: const Text('Değişiklikleri kaydet'),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }
