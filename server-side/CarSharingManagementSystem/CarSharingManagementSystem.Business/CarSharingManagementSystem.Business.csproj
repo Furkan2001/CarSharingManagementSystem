@@ -10,4 +10,9 @@
     <Folder Include="Services\Impl\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CarSharingManagementSystem.DataAccess\CarSharingManagementSystem.DataAccess.csproj" />
+    <ProjectReference Include="..\CarSharingManagementSystem.Entities\CarSharingManagementSystem.Entities.csproj" />
+  </ItemGroup>
+
 </Project>

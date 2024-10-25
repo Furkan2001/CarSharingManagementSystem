@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\furkan.ekinci\\source\\repos\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj": {}
+    "/Users/furkan/Desktop/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {}
   },
   "projects": {
-    "C:\\Users\\furkan.ekinci\\source\\repos\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj": {
+    "/Users/furkan/Desktop/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\furkan.ekinci\\source\\repos\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj",
+        "projectUniqueName": "/Users/furkan/Desktop/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
         "projectName": "CarSharingManagementSystem.Entities",
-        "projectPath": "C:\\Users\\furkan.ekinci\\source\\repos\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj",
-        "packagesPath": "C:\\Users\\furkan.ekinci\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\furkan.ekinci\\source\\repos\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\obj\\",
+        "projectPath": "/Users/furkan/Desktop/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
+        "packagesPath": "/Users/furkan/.nuget/packages/",
+        "outputPath": "/Users/furkan/Desktop/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\furkan.ekinci\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/furkan/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -65,7 +58,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
