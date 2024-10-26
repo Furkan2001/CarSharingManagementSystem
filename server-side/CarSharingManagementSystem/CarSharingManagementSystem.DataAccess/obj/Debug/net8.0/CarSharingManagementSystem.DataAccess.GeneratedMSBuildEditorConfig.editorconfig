@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = CarSharingManagementSystem.DataAccess
-build_property.ProjectDir = /Users/furkan/Desktop/bitirme/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/
+build_property.ProjectDir = C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.DataAccess\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
