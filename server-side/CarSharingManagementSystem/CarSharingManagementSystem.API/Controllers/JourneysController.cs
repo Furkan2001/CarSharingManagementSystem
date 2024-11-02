@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using CarSharingManagementSystem.Entities;
+using CarSharingManagementSystem.Business.Services.Interfaces;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -7,93 +11,98 @@ namespace CarSharingManagementSystem.Controllers
     [ApiController]
     public class JourneysController : ControllerBase
     {
+        private readonly IJourneyService _journeyService;
+
+        public JourneysController(IJourneyService journeyService)
+        {
+            _journeyService = journeyService;
+        }
+
         // GET: api/Journey/all
         [HttpGet("all")]
-        public IActionResult GetAllJourneys()
+        public async Task<IActionResult> GetAllJourneys()
         {
-            var journeys = new[]
-            {
-                new { Id = 1, UserName = "Esat", Beginning = "Gtü", Destination = "Kartal", Time = "15:00" },
-                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
-            };
+            var journeys = await _journeyService.GetAllAsync();
             return Ok(journeys);
         }
 
         // GET: api/Journey/mine
         [HttpGet("mine")]
-        public IActionResult GetMyJourneys()
+        public async Task<IActionResult> GetMyJourneys()
         {
-            var journeys = new[]
-            {
-                new { Id = 1, UserName = "Esat", Beginning = "Gtü", Destination = "Kartal", Time = "15:00" },
-                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
-            };
+            var journeys = await _journeyService.GetAllAsync(); // Örnek olarak tümünü alıyoruz
             return Ok(journeys);
         }
 
         // GET: api/Journey/5
         [HttpGet("{id}")]
-        public IActionResult GetJourneyById(int id)
+        public async Task<IActionResult> GetJourneyById(int id)
         {
-            var journey = new
+            var journey = await _journeyService.GetByIdAsync(id);
+            if (journey == null)
             {
-                Id = 1,
-                UserName = "Esat",
-                Beginning = "Gtü",
-                Destination = "Kartal",
-                Time = "15:00",
-                Path = new[]
-                {
-                    new { Town = "Gebze" },
-                    new { Town = "Tuzla" },
-                    new { Town = "Pendik" },
-                    new { Town = "Kartal" }
-                }
-            };
+                return NotFound();
+            }
             return Ok(journey);
         }
 
         // POST: api/Journey
         [HttpPost]
-        public IActionResult CreateJourney([FromBody] object journey)
+        public async Task<IActionResult> CreateJourney([FromBody] Journey journey)
         {
-            var result = new[]
+            if (journey == null)
             {
-                new {Bool = "True"}
-            };
-            return Ok(result);
+                return BadRequest("Journey data is null.");
+            }
+
+            var result = await _journeyService.AddAsync(journey);
+            if (result == -1)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating journey.");
+            }
+
+            return CreatedAtAction(nameof(GetJourneyById), new { id = journey.JourneyId }, journey);
         }
 
         // PUT: api/Journey/5
         [HttpPut("{id}")]
-        public IActionResult UpdateJourney(int id, [FromBody] object journey)
+        public async Task<IActionResult> UpdateJourney(int id, [FromBody] Journey journey)
         {
-            var result = new[]
+            if (journey == null || journey.JourneyId != id)
             {
-                new {Bool = "True"}
-            };
-            return Ok(result);
+                return BadRequest("Journey data is incorrect.");
+            }
+
+            var result = await _journeyService.UpdateAsync(journey);
+            if (result == -1)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating journey.");
+            }
+
+            return NoContent();
         }
 
         // DELETE: api/Journey/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteJourney(int id)
+        public async Task<IActionResult> DeleteJourney(int id)
         {
-            var result = new[]
+            var result = await _journeyService.DeleteAsync(id);
+            if (result == -1)
             {
-                new {Bool = "True"}
-            };
-            return Ok(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting journey.");
+            }
+
+            return NoContent();
         }
 
-        // Custom Route: api/Journey/search?origin=Chicago&destination=Houston
+        // Custom Route: api/Journey/filter?origin=Gtü&destination=Kadıköy
         [HttpGet("filter")]
-        public IActionResult FilterJourneys(string origin, string destination)
+        public async Task<IActionResult> FilterJourneys(string origin, string destination)
         {
-            var journeys = new[]
-            {
-                new { Id = 2, UserName = "Furkan", Beginning = "Gtü", Destination = "Kadıköy", Time = "17:30" }
-            };
+            // Filtre işlemi için özel bir metod tanımlanabilir.
+            // Örneğin, _journeyService.FilterByOriginAndDestination(origin, destination) gibi
+
+            var journeys = await _journeyService.GetAllAsync(); // Tümünü almak yerine filtre uygulanabilir
             return Ok(journeys);
         }
     }

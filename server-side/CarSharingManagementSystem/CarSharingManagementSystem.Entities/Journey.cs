@@ -1,33 +1,32 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace CarSharingManagementSystem.Entities
 {
+    [Table("Journey")]
     public class Journey
     {
         [Key]
+        [Column("journey_id")]
         public int JourneyId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string UserName { get; set; }  // Kullanıcı adı
+        [Column("has_vehicle")]
+        public bool HasVehicle { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        public string Beginning { get; set; }  // Başlangıç noktası
+        [Column("map_id")]
+        public int? MapId { get; set; }  // Foreign key, nullable olabilir
 
-        [Required]
-        [MaxLength(100)]
-        public string Destination { get; set; }  // Varış noktası
+        [Column("time")]
+        public DateTime Time { get; set; }
 
-        [Required]
-        public DateTime Time { get; set; }  // Yolculuk zamanı
+        [Column("is_one_time")]
+        public bool IsOneTime { get; set; }
 
-        // Foreign Key (Car)
-        public int CarId { get; set; }
+        [Column("user_id")]
+        public int UserId { get; set; }
 
-        [ForeignKey("CarId")]
-        public Car Car { get; set; }  // İlişkili araba
+        // Navigation properties
+        public User User { get; set; }
+        public Map Map { get; set; }
     }
 }

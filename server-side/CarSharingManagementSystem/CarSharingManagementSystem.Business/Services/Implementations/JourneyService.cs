@@ -13,39 +13,29 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             _journeyRepository = journeyRepository;
         }
 
-        public async Task<IEnumerable<Journey>> GetAllJourneysAsync()
+        public async Task<IEnumerable<Journey>> GetAllAsync()
         {
             return await _journeyRepository.GetAllAsync();
         }
 
-        public async Task<IEnumerable<Journey>> GetJourneysByUsernameAsync(string username)
-        {
-            return await _journeyRepository.GetByUsernameAsync(username);
-        }
-
-        public async Task<Journey?> GetJourneyByIdAsync(int id)
+        public async Task<Journey> GetByIdAsync(int id)
         {
             return await _journeyRepository.GetByIdAsync(id);
         }
 
-        public async Task AddJourneyAsync(Journey journey)
+        public async Task<int> AddAsync(Journey journey)
         {
-            await _journeyRepository.AddAsync(journey);
+            return await _journeyRepository.AddAsync(journey);
         }
 
-        public async Task UpdateJourneyAsync(Journey journey)
+        public async Task<int> UpdateAsync(Journey journey)
         {
-            await _journeyRepository.UpdateAsync(journey);
+            return await _journeyRepository.UpdateAsync(journey);
         }
 
-        public async Task DeleteJourneyAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            await _journeyRepository.DeleteAsync(id);
-        }
-
-        public async Task<IEnumerable<Journey>> FilterJourneysAsync(string origin, string destination)
-        {
-            return await _journeyRepository.FilterByLocationAsync(origin, destination);
+            return await _journeyRepository.DeleteAsync(id);
         }
     }
 }

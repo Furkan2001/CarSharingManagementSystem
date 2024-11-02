@@ -17,48 +17,67 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
 
         public async Task<IEnumerable<Journey>> GetAllAsync()
         {
-            return await _context.Journeys.ToListAsync();
+            // User ve Map ilişkilerini dahil ederek tüm Journey kayıtlarını getiriyoruz
+            return await _context.Journeys
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .ToListAsync();
         }
 
-        public async Task<Journey?> GetByIdAsync(int id)
+        public async Task<Journey> GetByIdAsync(int id)
         {
-            return await _context.Journeys.FindAsync(id);
+            // Tek bir Journey kaydını ilişkili User ve Map ile birlikte getiriyoruz
+            return await _context.Journeys
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .FirstOrDefaultAsync(j => j.JourneyId == id);
         }
 
-        public async Task AddAsync(Journey journey)
+        public async Task<int> AddAsync(Journey journey)
         {
-            await _context.Journeys.AddAsync(journey);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(Journey journey)
-        {
-            _context.Journeys.Update(journey);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var journey = await GetByIdAsync(id);
-            if (journey != null)
+            try
             {
-                _context.Journeys.Remove(journey);
+                await _context.Journeys.AddAsync(journey);
                 await _context.SaveChangesAsync();
+                return 0; // Success
+            }
+            catch
+            {
+                return -1; // Failure
             }
         }
 
-        public async Task<IEnumerable<Journey>> GetByUsernameAsync(string username)
+        public async Task<int> UpdateAsync(Journey journey)
         {
-            return await _context.Journeys
-                .Where(j => j.UserName == username)
-                .ToListAsync();
+            try
+            {
+                _context.Journeys.Update(journey);
+                await _context.SaveChangesAsync();
+                return 0; // Success
+            }
+            catch
+            {
+                return -1; // Failure
+            }
         }
 
-        public async Task<IEnumerable<Journey>> FilterByLocationAsync(string origin, string destination)
+        public async Task<int> DeleteAsync(int id)
         {
-            return await _context.Journeys
-                .Where(j => j.Beginning == origin && j.Destination == destination)
-                .ToListAsync();
+            try
+            {
+                var journey = await _context.Journeys.FindAsync(id);
+                if (journey != null)
+                {
+                    _context.Journeys.Remove(journey);
+                    await _context.SaveChangesAsync();
+                    return 0; // Success
+                }
+                return -1; // Journey not found
+            }
+            catch
+            {
+                return -1; // Failure
+            }
         }
     }
 }
