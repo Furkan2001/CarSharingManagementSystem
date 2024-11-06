@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using CarSharingManagementSystem.Entities;
 using CarSharingManagementSystem.Business.Services.Interfaces;
+using CarSharingManagementSystem.DTOs;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -27,10 +28,10 @@ namespace CarSharingManagementSystem.Controllers
         }
 
         // GET: api/Journey/mine
-        [HttpGet("mine")]
-        public async Task<IActionResult> GetMyJourneys()
+        [HttpGet("mine/{id}")]
+        public async Task<IActionResult> GetMyJourneys(int id)
         {
-            var journeys = await _journeyService.GetAllAsync(); // Örnek olarak tümünü alıyoruz
+            var journeys = await _journeyService.GetByUserIdAsync(id);
             return Ok(journeys);
         }
 
@@ -43,6 +44,14 @@ namespace CarSharingManagementSystem.Controllers
             {
                 return NotFound();
             }
+            return Ok(journey);
+        }
+
+        // Bu fonksiyon filtrelemelere göre düzenlenecek.
+        [HttpPost("filter")]
+        public async Task<IActionResult> FilterJourney([FromBody] JourneyFilterModel filterModel)
+        {
+            var journey = await _journeyService.GetAllAsync();
             return Ok(journey);
         }
 
@@ -95,15 +104,6 @@ namespace CarSharingManagementSystem.Controllers
             return NoContent();
         }
 
-        // Custom Route: api/Journey/filter?origin=Gtü&destination=Kadıköy
-        [HttpGet("filter")]
-        public async Task<IActionResult> FilterJourneys(string origin, string destination)
-        {
-            // Filtre işlemi için özel bir metod tanımlanabilir.
-            // Örneğin, _journeyService.FilterByOriginAndDestination(origin, destination) gibi
 
-            var journeys = await _journeyService.GetAllAsync(); // Tümünü almak yerine filtre uygulanabilir
-            return Ok(journeys);
-        }
     }
 }

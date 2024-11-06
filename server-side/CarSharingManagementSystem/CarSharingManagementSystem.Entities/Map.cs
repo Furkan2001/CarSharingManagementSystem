@@ -24,8 +24,5 @@ namespace CarSharingManagementSystem.Entities
 
         [Column("map_route")]
         public string MapRoute { get; set; }
-
-        // Navigation property
-        public ICollection<Journey> Journeys { get; set; }
     }
 }

@@ -24,13 +24,21 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task<Journey> GetByIdAsync(int id)
+        public async Task<Journey?> GetByIdAsync(int id)
         {
             // Tek bir Journey kaydını ilişkili User ve Map ile birlikte getiriyoruz
             return await _context.Journeys
                 .Include(j => j.User)
                 .Include(j => j.Map)
                 .FirstOrDefaultAsync(j => j.JourneyId == id);
+        }
+
+        public async Task<IEnumerable<Journey>> GetByUserIdAsync(int userId)
+        {
+            return await _context.Journeys
+                .Where(j => j.UserId == userId)
+                .Include(j => j.Map)
+                .ToListAsync();
         }
 
         public async Task<int> AddAsync(Journey journey)

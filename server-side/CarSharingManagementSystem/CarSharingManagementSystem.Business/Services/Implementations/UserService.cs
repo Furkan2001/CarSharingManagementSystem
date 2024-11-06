@@ -23,6 +23,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _userRepository.GetByIdAsync(id);
         }
 
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _userRepository.GetUserByEmailAsync(email);
+        }
+        
         public async Task<int> AddAsync(User user)
         {
             return await _userRepository.AddAsync(user);

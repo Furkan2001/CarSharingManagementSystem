@@ -20,7 +20,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             return await _context.JourneyDays.ToListAsync();
         }
 
-        public async Task<JourneyDay> GetByIdAsync(int id)
+        public async Task<JourneyDay?> GetByIdAsync(int id)
         {
             return await _context.JourneyDays.FindAsync(id);
         }

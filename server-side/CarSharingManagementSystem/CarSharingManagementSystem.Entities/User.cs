@@ -42,8 +42,5 @@ namespace CarSharingManagementSystem.Entities
 
         [Column("sustainability_point")]
         public int SustainabilityPoint { get; set; }
-
-        // Navigation property
-        public ICollection<Journey> Journeys { get; set; }
     }
 }

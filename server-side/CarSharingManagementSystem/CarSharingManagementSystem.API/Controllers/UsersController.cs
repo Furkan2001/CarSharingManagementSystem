@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CarSharingManagementSystem.Business.Services.Interfaces;
+using CarSharingManagementSystem.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarSharingManagementSystem.Controllers
@@ -7,14 +9,39 @@ namespace CarSharingManagementSystem.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult GetUsers()
+        private readonly IUserService _userService;
+
+        public UsersController(IUserService userService)
         {
-            var user = new[]
-            {
-                new { Id = 1, Name = "Furkan", Email = "furkan@example.com" }
-            };
+            _userService = userService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var user = await _userService.GetAllAsync();
             return Ok(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ControlUser(User _user)
+        {
+            var users = await _userService.GetAllAsync();
+
+            foreach(User user in users)
+            {
+                if (user.Email == _user.Email)
+                    return Ok(user.UserId);
+            }
+
+            await _userService.AddAsync(_user);
+
+            var tempUser = await _userService.GetUserByEmailAsync(_user.Email);
+
+            if (tempUser != null)
+                return Ok(tempUser.UserId);
+
+            return Ok();
         }
     }
 }
