@@ -1,5 +1,6 @@
 ﻿using CarSharingManagementSystem.Business.Services.Interfaces;
 using CarSharingManagementSystem.Entities;
+using CarSharingManagementSystem.HelperClasses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,15 +32,16 @@ namespace CarSharingManagementSystem.Controllers
             foreach(User user in users)
             {
                 if (user.Email == _user.Email)
-                    return Ok(user.UserId);
+                    return Ok(user);
             }
 
+            _user.apiKey = ApiKeyGenerator.GenerateApiKey();
             await _userService.AddAsync(_user);
 
             var tempUser = await _userService.GetUserByEmailAsync(_user.Email);
 
             if (tempUser != null)
-                return Ok(tempUser.UserId);
+                return Ok(tempUser);
 
             return Ok();
         }

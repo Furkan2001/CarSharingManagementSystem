@@ -33,6 +33,13 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<User?> GetUserByApiKeyAsync(string apiKey)
+        {
+            return await _context.Users
+                .Where(u => u.apiKey == apiKey)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<int> AddAsync(User user)
         {
             try

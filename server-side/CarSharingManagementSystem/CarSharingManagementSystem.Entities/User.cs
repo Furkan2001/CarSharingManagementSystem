@@ -42,5 +42,8 @@ namespace CarSharingManagementSystem.Entities
 
         [Column("sustainability_point")]
         public int SustainabilityPoint { get; set; }
+
+        [Column("api_key")]
+        public string apiKey {get; set; }
     }
 }
