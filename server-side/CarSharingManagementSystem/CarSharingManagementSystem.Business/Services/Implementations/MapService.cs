@@ -28,6 +28,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _mapRepository.AddAsync(map);
         }
 
+        public async Task<int> PrivateAddAsync(Map map)
+        {
+            return await _mapRepository.PrivateAddAsync(map);
+        }
+
         public async Task<int> UpdateAsync(Map map)
         {
             return await _mapRepository.UpdateAsync(map);

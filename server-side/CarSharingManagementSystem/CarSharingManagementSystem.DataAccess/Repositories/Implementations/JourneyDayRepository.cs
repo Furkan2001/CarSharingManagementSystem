@@ -17,12 +17,16 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
 
         public async Task<IEnumerable<JourneyDay>> GetAllAsync()
         {
-            return await _context.JourneyDays.ToListAsync();
+            return await _context.JourneyDays
+                .Include(jd => jd.Day)
+                .ToListAsync();
         }
 
-        public async Task<JourneyDay?> GetByIdAsync(int id)
+        public async Task<JourneyDay> GetByIdAsync(int id)
         {
-            return await _context.JourneyDays.FindAsync(id);
+            return await _context.JourneyDays
+                .Include(jd => jd.Day)
+                .FirstOrDefaultAsync(jd => jd.JourneyDayId == id);
         }
 
         public async Task<int> AddAsync(JourneyDay journeyDay)

@@ -1,4 +1,4 @@
-namespace CarSharingManagementSystem.DTOs
+namespace CarSharingManagementSystem.DataAccess.DTOs
 {
     public class JourneyFilterModel
     {

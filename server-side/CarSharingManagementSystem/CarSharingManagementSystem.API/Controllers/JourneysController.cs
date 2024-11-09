@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using CarSharingManagementSystem.Entities;
 using CarSharingManagementSystem.Business.Services.Interfaces;
-using CarSharingManagementSystem.DTOs;
+using CarSharingManagementSystem.DataAccess.DTOs;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -13,16 +13,21 @@ namespace CarSharingManagementSystem.Controllers
     public class JourneysController : ControllerBase
     {
         private readonly IJourneyService _journeyService;
+        private readonly IMapService _mapService;
+        private readonly IJourneyDayService _journeyDayService;
 
-        public JourneysController(IJourneyService journeyService)
+        public JourneysController(IJourneyService journeyService, IMapService mapService, IJourneyDayService journeyDayService)
         {
             _journeyService = journeyService;
+            _mapService = mapService;
+            _journeyDayService = journeyDayService;
         }
 
         // GET: api/Journey/all
         [HttpGet("all")]
         public async Task<IActionResult> GetAllJourneys()
         {
+            await _journeyService.AutoDeleteAsync();
             var journeys = await _journeyService.GetAllAsync();
             return Ok(journeys);
         }
@@ -31,6 +36,7 @@ namespace CarSharingManagementSystem.Controllers
         [HttpGet("mine/{id}")]
         public async Task<IActionResult> GetMyJourneys(int id)
         {
+            await _journeyService.AutoDeleteAsync();
             var journeys = await _journeyService.GetByUserIdAsync(id);
             return Ok(journeys);
         }
@@ -39,6 +45,7 @@ namespace CarSharingManagementSystem.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJourneyById(int id)
         {
+            await _journeyService.AutoDeleteAsync();
             var journey = await _journeyService.GetByIdAsync(id);
             if (journey == null)
             {
@@ -51,7 +58,7 @@ namespace CarSharingManagementSystem.Controllers
         [HttpPost("filter")]
         public async Task<IActionResult> FilterJourney([FromBody] JourneyFilterModel filterModel)
         {
-            var journey = await _journeyService.GetAllAsync();
+            var journey = await _journeyService.GetFilteredJourneysAsync(filterModel);
             return Ok(journey);
         }
 
@@ -64,7 +71,9 @@ namespace CarSharingManagementSystem.Controllers
                 return BadRequest("Journey data is null.");
             }
 
-            var result = await _journeyService.AddAsync(journey);
+            int result;
+
+            result = await _journeyService.AddAsync(journey);
             if (result == -1)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error creating journey.");
@@ -95,15 +104,20 @@ namespace CarSharingManagementSystem.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJourney(int id)
         {
-            var result = await _journeyService.DeleteAsync(id);
+            Journey journey = await _journeyService.GetByIdAsync(id);
+
+            int result = 0;
+
+            if (journey.MapId.HasValue)
+                result = await _mapService.DeleteAsync(journey.MapId.Value);
             if (result == -1)
-            {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting journey.");
-            }
+
+            result = await _journeyService.DeleteAsync(id);
+            if (result == -1)
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting journey.");
 
             return NoContent();
         }
-
-
     }
 }

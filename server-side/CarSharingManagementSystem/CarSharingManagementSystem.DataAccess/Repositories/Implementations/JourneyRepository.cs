@@ -3,6 +3,7 @@ using CarSharingManagementSystem.DataAccess.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CarSharingManagementSystem.DataAccess.DTOs;
 
 namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
 {
@@ -21,15 +22,19 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             return await _context.Journeys
                 .Include(j => j.User)
                 .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
                 .ToListAsync();
         }
 
-        public async Task<Journey?> GetByIdAsync(int id)
+        public async Task<Journey> GetByIdAsync(int id)
         {
             // Tek bir Journey kaydını ilişkili User ve Map ile birlikte getiriyoruz
             return await _context.Journeys
                 .Include(j => j.User)
                 .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
                 .FirstOrDefaultAsync(j => j.JourneyId == id);
         }
 
@@ -37,8 +42,104 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
         {
             return await _context.Journeys
                 .Where(j => j.UserId == userId)
+                .Include(j => j.User)
                 .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetAccordingToTime(DateTime start, DateTime end)
+        {
+            return await _context.Journeys
+                .Where(j => j.Time > end && start < j.Time)
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetAccordingToStartAndDestinationLocation(string startDistrict, string destinationDistrict)
+        {
+            return await _context.Journeys
+                .Where(j => j.Map.CurrentDistrict == startDistrict && j.Map.DestinationDistrict == destinationDistrict)
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetAccordingToStartLocation(string startDistrict)
+        {
+            return await _context.Journeys
+                .Where(j => j.Map.CurrentDistrict == startDistrict)
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetAccordingToDestinationLocation(string destinationDistrict)
+        {
+            return await _context.Journeys
+                .Where(j => j.Map.DestinationDistrict == destinationDistrict)
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetAccordingToHasVehicle(bool hasVehicle)
+        {
+            return await _context.Journeys
+                .Where(j => j.HasVehicle == hasVehicle)
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Journey>> GetFilteredJourneysAsync(JourneyFilterModel filterModel)
+        {
+            var query = _context.Journeys
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .AsQueryable();
+
+            if (filterModel.StartTime.HasValue)
+            {
+                query = query.Where(j => j.Time >= filterModel.StartTime.Value);
+            }
+
+            if (filterModel.EndTime.HasValue)
+            {
+                query = query.Where(j => j.Time <= filterModel.EndTime.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filterModel.StartDistrict))
+            {
+                query = query.Where(j => j.Map.CurrentDistrict == filterModel.StartDistrict);
+            }
+
+            if (!string.IsNullOrEmpty(filterModel.DestinationDistrict))
+            {
+                query = query.Where(j => j.Map.DestinationDistrict == filterModel.DestinationDistrict);
+            }
+
+            if (filterModel.HasVehicle.HasValue)
+            {
+                bool hasVehicle = filterModel.HasVehicle == 1;
+                query = query.Where(j => j.HasVehicle == hasVehicle);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<int> AddAsync(Journey journey)
@@ -49,8 +150,9 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 await _context.SaveChangesAsync();
                 return 0; // Success
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return -1; // Failure
             }
         }
@@ -63,8 +165,9 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 await _context.SaveChangesAsync();
                 return 0; // Success
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return -1; // Failure
             }
         }
@@ -73,7 +176,11 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
         {
             try
             {
-                var journey = await _context.Journeys.FindAsync(id);
+                var journey = await _context.Journeys
+                    .Include(j => j.Map)
+                    .Include(j => j.JourneyDays)
+                    .FirstOrDefaultAsync(j => j.JourneyId == id);
+                    
                 if (journey != null)
                 {
                     _context.Journeys.Remove(journey);
@@ -82,9 +189,42 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 }
                 return -1; // Journey not found
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return -1; // Failure
+            }
+        }
+
+        public async Task AutoDeleteAsync()
+        {
+            var expiredJourneys = await _context.Journeys
+                .Where(j => j.Time < DateTime.Now && j.IsOneTime == true)
+                .ToListAsync();
+
+            if (expiredJourneys.Any())
+            {
+                var mapIdsToDelete = expiredJourneys
+                    .Where(j => j.MapId.HasValue)
+                    .Select(j => j.MapId.Value)
+                    .Distinct();
+
+                var journeyIdsToDelete = expiredJourneys
+                    .Select(j => j.JourneyId);
+
+                var mapsToDelete = await _context.Maps
+                    .Where(m => mapIdsToDelete.Contains(m.MapId))
+                    .ToListAsync();
+
+                var journeyDaysToDelete = await _context.JourneyDays
+                    .Where(jd => journeyIdsToDelete.Contains(jd.JourneyId))
+                    .ToListAsync();
+
+                _context.Maps.RemoveRange(mapsToDelete);
+                _context.JourneyDays.RemoveRange(journeyDaysToDelete);
+                _context.Journeys.RemoveRange(expiredJourneys);
+
+                await _context.SaveChangesAsync();
             }
         }
     }

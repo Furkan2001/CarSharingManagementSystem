@@ -12,8 +12,5 @@ namespace CarSharingManagementSystem.Entities
 
         [Column("day_name")]
         public string DayName { get; set; }
-
-        // Navigation property
-        public ICollection<JourneyDay> JourneyDays { get; set; }
     }
 }

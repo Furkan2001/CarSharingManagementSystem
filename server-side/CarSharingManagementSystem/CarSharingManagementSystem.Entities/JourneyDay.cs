@@ -16,8 +16,6 @@ namespace CarSharingManagementSystem.Entities
         [Column("day_id")]
         public int DayId { get; set; }
 
-        // Navigation properties
-        public Journey Journey { get; set; }
-        public Day Day { get; set; }
+        public Day? Day { get; set; }
     }
 }

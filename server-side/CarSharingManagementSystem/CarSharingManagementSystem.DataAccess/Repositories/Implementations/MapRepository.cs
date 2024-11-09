@@ -20,7 +20,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             return await _context.Maps.ToListAsync();
         }
 
-        public async Task<Map?> GetByIdAsync(int id)
+        public async Task<Map> GetByIdAsync(int id)
         {
             return await _context.Maps.FindAsync(id);
         }
@@ -33,9 +33,24 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 await _context.SaveChangesAsync();
                 return 0; // Success
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return -1; // Failure
+            }
+        }
+
+        public async Task<int> PrivateAddAsync(Map map)
+        {
+            try
+            {
+                await _context.Maps.AddAsync(map);
+                await _context.SaveChangesAsync();
+                return map.MapId;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Map eklenirken bir hata oluştu.", ex);
             }
         }
 
@@ -66,8 +81,9 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 }
                 return -1; // Map not found
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return -1; // Failure
             }
         }

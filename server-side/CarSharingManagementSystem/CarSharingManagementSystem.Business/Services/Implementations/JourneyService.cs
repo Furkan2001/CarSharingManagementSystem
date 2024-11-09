@@ -1,4 +1,5 @@
 using CarSharingManagementSystem.Business.Services.Interfaces;
+using CarSharingManagementSystem.DataAccess.DTOs;
 using CarSharingManagementSystem.DataAccess.Repositories.Interfaces;
 using CarSharingManagementSystem.Entities;
 
@@ -33,6 +34,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _journeyRepository.AddAsync(journey);
         }
 
+        public async Task<IEnumerable<Journey>> GetFilteredJourneysAsync(JourneyFilterModel filterModel)
+        {
+            return await _journeyRepository.GetFilteredJourneysAsync(filterModel);
+        }
+
         public async Task<int> UpdateAsync(Journey journey)
         {
             return await _journeyRepository.UpdateAsync(journey);
@@ -41,6 +47,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
         public async Task<int> DeleteAsync(int id)
         {
             return await _journeyRepository.DeleteAsync(id);
+        }
+
+        public async Task AutoDeleteAsync()
+        {
+            await _journeyRepository.AutoDeleteAsync();
         }
     }
 }

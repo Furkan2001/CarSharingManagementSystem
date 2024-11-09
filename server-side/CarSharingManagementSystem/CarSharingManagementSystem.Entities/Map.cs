@@ -24,5 +24,11 @@ namespace CarSharingManagementSystem.Entities
 
         [Column("map_route")]
         public string MapRoute { get; set; }
+
+        [Column("current_district")]
+        public string CurrentDistrict { get; set; }
+
+        [Column("destination_district")]
+        public string DestinationDistrict { get; set; }
     }
 }
