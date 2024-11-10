@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'my_post_screen.dart';
+import 'edit_post_screen.dart';
 import '../widgets/menu_widget.dart';
+import 'package:intl/date_symbol_data_local.dart'; 
+import 'package:intl/intl.dart';
 import '../services/posts_service.dart';
 
 class YourPostsScreen extends StatefulWidget {
@@ -18,6 +20,11 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
   void initState() {
     super.initState();
     _fetchUsersJourneys();
+    _initializeLocale();
+  }
+
+  Future<void> _initializeLocale() async {
+    await initializeDateFormatting('tr', null); // Initialize Turkish locale
   }
 
   Future<void> _fetchUsersJourneys() async {
@@ -39,7 +46,7 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
     final post = _yourPosts[index];
 
     try {
-      await PostsService.deleteJourney(post['id']);
+      await PostsService.deleteJourney(post['journeyId']);
       setState(() {
         _yourPosts.removeAt(index);
       });
@@ -52,13 +59,6 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
         const SnackBar(content: Text('Silme işlemi başarısız oldu.')),
       );
     }
-  }
-
-  void _updatePost(int index, Map<String, dynamic> updatedPost) {
-
-    setState(() {
-      _yourPosts[index] = updatedPost;
-    });
   }
 
   @override
@@ -75,27 +75,35 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
               : ListView.builder(
                   itemCount: _yourPosts.length,
                   itemBuilder: (context, index) {
+
                     final post = _yourPosts[index];
+
+                    final currentDistrict = post['map']?['currentDistrict'] ?? 'Unknown';
+                    final destinationDistrict = post['map']?['destinationDistrict'] ?? 'Unknown';
+
+                    final timeString = post['time'] ?? 'N/A';
+
+                    String formattedTime;
+                    if (timeString != 'N/A') {
+                      final DateTime dateTime = DateTime.parse(timeString);
+                      final DateFormat formatter = DateFormat('dd MMMM yyyy HH:mm', 'tr');
+                      formattedTime = formatter.format(dateTime);
+                    } else {
+                      formattedTime = 'N/A';
+                    }
+
                     return Card(
                       margin: const EdgeInsets.all(8.0),
                       child: ListTile(
                         leading: const Icon(Icons.directions_car),
-                        title: Text('${post['beginning']} → ${post['destination']}'),
-                        subtitle: Text('Kalkış Saati: ${post['time'] ?? 'N/A'}'),
+                        title: Text('$currentDistrict → $destinationDistrict'),
+                        subtitle: Text(formattedTime),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MyPostScreen(
-                                post: {
-                                  'id': post['id'] ?? 0,
-                                  'name': post['userName'] ?? 'Unknown',
-                                  'beginning': post['beginning'] ?? '',
-                                  'destination': post['destination'] ?? '',
-                                  'time': post['time'] ?? 'N/A',
-                                },
-                                index: index,
-                                updatePost: _updatePost,
+                              builder: (context) => EditPostScreen(
+                                journeyId: post['journeyId'],
                               ),
                             ),
                           );

@@ -29,6 +29,12 @@ class Menu extends StatelessWidget {
           ),
           _buildMenuItem(
             context: context,
+            title: 'İstekleri Gör',
+            icon: Icons.list,
+            routeName: '/requests',
+          ),
+          _buildMenuItem(
+            context: context,
             title: 'Paylaşım Oluştur',
             icon: Icons.add,
             routeName: '/create_post',

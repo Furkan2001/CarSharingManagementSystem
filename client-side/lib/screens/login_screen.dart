@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'see_posts_screen.dart';
+import 'vehicle_posts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

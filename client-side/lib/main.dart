@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
-import 'screens/see_posts_screen.dart';
+import 'screens/vehicle_posts.dart';
+import 'screens/vehicle_requests.dart';
 import 'screens/create_post_screen.dart';
 import 'screens/your_posts_screen.dart';
 
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/posts': (context) => const VehiclePostsScreen(), 
+        '/posts': (context) => const VehiclePostsScreen(),
+        '/requests': (context) => const VehicleRequestsScreen(),
         '/create_post': (context) => const CreatePostScreen(),
         '/your_posts': (context) => const YourPostsScreen(),
       }

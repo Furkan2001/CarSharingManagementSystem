@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/date_symbol_data_local.dart'; // Initialize locale data
+
 import '../services/posts_service.dart';
 import 'chat_screen.dart';
 
@@ -18,7 +21,12 @@ class _PostScreenState extends State<PostScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeLocale();
     _fetchJourney();
+  }
+
+  Future<void> _initializeLocale() async {
+    await initializeDateFormatting('tr', null); // Initialize Turkish locale
   }
 
   Future<void> _fetchJourney() async {
@@ -37,7 +45,7 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Journey Details'),
+        title: const Text('İlan Detayları'),
         backgroundColor: Colors.blueAccent,
       ),
       body: _isLoading
@@ -61,6 +69,14 @@ class _PostScreenState extends State<PostScreen> {
 
   // Build the main journey details card
   Widget _buildJourneyCard() {
+    // Format the time in Turkish locale
+    String formattedTime = 'N/A';
+    if (_journey?['time'] != null) {
+      final DateTime dateTime = DateTime.parse(_journey!['time']);
+      final DateFormat formatter = DateFormat('dd MMMM yyyy HH:mm', 'tr');
+      formattedTime = formatter.format(dateTime);
+    }
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -76,7 +92,7 @@ class _PostScreenState extends State<PostScreen> {
                 const Icon(Icons.person, size: 28, color: Colors.blueAccent),
                 const SizedBox(width: 8),
                 Text(
-                  _journey!['userName'],
+                  _journey?['user']?['username'] ?? 'Unknown',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -85,11 +101,19 @@ class _PostScreenState extends State<PostScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.location_on, 'From:', _journey!['beginning']),
+            _buildInfoRow(
+              Icons.location_on,
+              'Başlangıç:',
+              '${_journey?['map']?['currentDistrict'] ?? 'Unknown'}',
+            ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.flag, 'To:', _journey!['destination']),
+            _buildInfoRow(
+              Icons.flag,
+              'Hedef:',
+              '${_journey?['map']?['destinationDistrict'] ?? 'Unknown'}',
+            ),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.access_time, 'Time:', _journey!['time']),
+            _buildInfoRow(Icons.access_time, 'Tarih:', formattedTime),
           ],
         ),
       ),
@@ -133,7 +157,7 @@ class _PostScreenState extends State<PostScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    ChatScreen(postOwnerName: _journey!['userName']),
+                    ChatScreen(postOwnerName: _journey?['user']?['username'] ?? 'Unknown'),
               ),
             );
           },
