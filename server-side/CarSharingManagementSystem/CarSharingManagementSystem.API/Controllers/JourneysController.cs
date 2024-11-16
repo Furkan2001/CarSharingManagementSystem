@@ -54,7 +54,6 @@ namespace CarSharingManagementSystem.Controllers
             return Ok(journey);
         }
 
-        // Bu fonksiyon filtrelemelere göre düzenlenecek.
         [HttpPost("filter")]
         public async Task<IActionResult> FilterJourney([FromBody] JourneyFilterModel filterModel)
         {
