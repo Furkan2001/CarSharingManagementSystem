@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart'; // Initialize locale data
 
 import '../services/posts_service.dart';
 import 'chat_screen.dart';
+import '../widgets/custom_appbar.dart';
 
 class PostScreen extends StatefulWidget {
   final int journeyId;
@@ -44,27 +45,27 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('İlan Detayları'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildJourneyCard(),
-                    ],
-                  ),
+      appBar: const CustomAppBar(title: 'İlan Detayları'),
+      body: Container(
+        color: const Color.fromARGB(255, 54, 69, 74),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildJourneyCard(),
+                        ],
+                      ),
+                    ),
+                    _buildChatButton(), // Chat button at the bottom left
+                  ],
                 ),
-                _buildChatButton(), // Chat button at the bottom left
-              ],
-            ),
-    );
+          )
+      );
   }
 
   // Build the main journey details card
@@ -89,7 +90,7 @@ class _PostScreenState extends State<PostScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.person, size: 28, color: Colors.blueAccent),
+                const Icon(Icons.person, size: 28, color: Color.fromARGB(255, 6, 30, 69)),
                 const SizedBox(width: 8),
                 Text(
                   _journey?['user']?['username'] ?? 'Unknown',
@@ -123,7 +124,7 @@ class _PostScreenState extends State<PostScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 24, color: Colors.blueAccent),
+        Icon(icon, size: 24, color: const Color.fromARGB(255, 6, 30, 69)),
         const SizedBox(width: 8),
         Text(
           label,
@@ -161,10 +162,10 @@ class _PostScreenState extends State<PostScreen> {
               ),
             );
           },
-          icon: const Icon(Icons.chat),
-          label: const Text('Chat'),
+          icon: const Icon(Icons.chat, color: Colors.white,),
+          label: const Text('Chat', style: TextStyle(color: Colors.white),),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: const Color.fromARGB(255, 6, 30, 69),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
+import '../widgets/custom_appbar.dart';
 
 class EditPostScreen extends StatefulWidget {
   final int journeyId;
@@ -210,92 +211,152 @@ class _EditPostScreenState extends State<EditPostScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Yolculuğu Düzenle'),
-      ),
+      appBar: const CustomAppBar(title: 'Yolculuğu Düzenle'),
       drawer: const Menu(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const SizedBox(height: 16),
-              _buildCoordinateField(_currentDistrict, 'Kalkış Yeri'),
-              const SizedBox(height: 16),
-              _buildCoordinateField(_destinationDistrict, 'Varış Yeri'),
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text(
-                  _selectedTime != null
-                      ? DateFormat('dd MMMM yyyy HH:mm', 'tr').format(_selectedTime!)
-                      : 'Kalkış Saati Seç',
+      body: Container(
+        color: const Color.fromARGB(255, 54, 69, 74),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                _buildFormSection(
+                  label: 'Kalkış Yeri',
+                  child: _buildCoordinateField(_currentDistrict),
                 ),
-                trailing: const Icon(Icons.access_time),
-                onTap: () => _selectDateTime(context),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('Aracınız var mı?'),
-                value: _hasVehicle,
-                onChanged: (value) {
-                  setState(() {
-                    _hasVehicle = value;
-                  });
-                },
-              ),
-              SwitchListTile(
-                title: const Text('Tek Seferlik Mi?'),
-                value: _isOneTime,
-                onChanged: (value) {
-                  setState(() {
-                    _isOneTime = value;
-                  });
-                },
-              ),
-              if (!_isOneTime) ...[
+                _buildFormSection(
+                  label: 'Varış Yeri',
+                  child: _buildCoordinateField(_destinationDistrict),
+                ),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: ListTile(
+                      tileColor: const Color(0xFF2E3B4E), // Optional background color for consistency
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      title: Text(
+                        _selectedTime != null
+                            ? DateFormat('dd MMMM yyyy HH:mm', 'tr').format(_selectedTime!)
+                            : 'Kalkış Saati Seç',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      trailing: const Icon(Icons.access_time, color: Colors.white),
+                      onTap: () => _selectDateTime(context),
+                    ),
+                  ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Günler:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                _buildFormSwitch(
+                  label: 'Aracınız var mı?',
+                  value: _hasVehicle,
+                  onChanged: (value) => setState(() => _hasVehicle = value),
                 ),
-                ..._selectedDays.keys.map((day) {
-                  return CheckboxListTile(
-                    title: Text(day),
-                    value: _selectedDays[day],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _selectedDays[day] = value ?? false;
-                      });
-                    },
-                  );
-                }).toList(),
+                _buildFormSwitch(
+                  label: 'Tek Seferlik Mi?',
+                  value: _isOneTime,
+                  onChanged: (value) => setState(() => _isOneTime = value),
+                ),
+                if (!_isOneTime)
+                 _buildFormSection(
+                      label: 'Günler',
+                      child: Column(
+                        children: _selectedDays.keys.map((day) {
+                          return CheckboxListTile(
+                            title: Text(
+                              day,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            value: _selectedDays[day],
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _selectedDays[day] = value ?? false;
+                              });
+                            },
+                            checkColor: Colors.white, // Color for the check inside the box
+                            activeColor: const Color.fromARGB(255, 6, 30, 69), // Color when checked
+                            tileColor: const Color(0xFF2E3B4E), // Background color for the tile
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            side: const BorderSide(color: Colors.white), // Makes unchecked box white
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: const Color.fromARGB(255, 6, 30, 69),
+                  ),
+                  child: const Text(
+                    'Yolculuğu Güncelle',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
               ],
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Yolculuk Güncelle'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCoordinateField(TextEditingController controller, String label) {
+Widget _buildCoordinateField(TextEditingController controller) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
+      decoration: const InputDecoration(
+        filled: true,
+        fillColor: Color(0xFF6F8695),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Lütfen $label girin';
+          return 'Lütfen bilgiyi girin';
         }
         return null;
       },
+      style: const TextStyle(color: Colors.white),
+    );
+  }
+
+  Widget _buildFormSection({required String label, required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormSwitch({
+    required String label,
+    required bool value,
+    required void Function(bool) onChanged,
+  }) {
+    return SwitchListTile(
+      title: Text(label, style: const TextStyle(color: Colors.white)),
+      value: value,
+      onChanged: onChanged,
+      activeColor: const Color.fromARGB(255, 6, 30, 69),
     );
   }
 }
+
+
