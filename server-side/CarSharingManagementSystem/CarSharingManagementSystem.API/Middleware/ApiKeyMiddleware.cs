@@ -8,6 +8,7 @@ namespace CarSharingManagementSystem.API.Middleware
     {
         private readonly RequestDelegate _next;
         private const string ApiKeyHeaderName = "x-api-key";
+        private const string UserIdHeaderName = "user_id";
 
         public ApiKeyMiddleware(RequestDelegate next)
         {
@@ -22,15 +23,24 @@ namespace CarSharingManagementSystem.API.Middleware
                 return;
             }
 
+            // x-api-key kontrolü
             if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey))
             {
                 context.Response.StatusCode = 401; // Unauthorized
                 await context.Response.WriteAsync("API Key is missing");
                 return;
             }
-            
-            var user = await userService.GetUserByApiKeyAsync(extractedApiKey);
 
+            // user_id kontrolü
+            if (!context.Request.Headers.TryGetValue(UserIdHeaderName, out var extractedUserId))
+            {
+                context.Response.StatusCode = 401; // Unauthorized
+                await context.Response.WriteAsync("User ID is missing");
+                return;
+            }
+
+            // API Key'e göre kullanıcıyı doğrula
+            var user = await userService.GetUserByApiKeyAsync(extractedApiKey);
             if (user == null)
             {
                 context.Response.StatusCode = 401; // Unauthorized
@@ -38,7 +48,15 @@ namespace CarSharingManagementSystem.API.Middleware
                 return;
             }
 
-            // API Key geçerliyse, isteği devam ettir
+            // user_id eşleşmesini kontrol et
+            if (user.UserId.ToString() != extractedUserId)
+            {
+                context.Response.StatusCode = 401; // Unauthorized
+                await context.Response.WriteAsync("User ID and API Key do not match");
+                return;
+            }
+
+            // Kullanıcı doğrulandı, isteği devam ettir
             await _next(context);
         }
     }

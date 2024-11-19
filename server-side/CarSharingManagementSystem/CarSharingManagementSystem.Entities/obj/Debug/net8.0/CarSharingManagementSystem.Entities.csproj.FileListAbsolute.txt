@@ -57,15 +57,3 @@ C:/Users/M. Esat/Desktop/Project/pr/CarSharingManagementSystem/server-side/CarSh
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/Debug/net8.0/refint/CarSharingManagementSystem.Entities.dll
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/Debug/net8.0/CarSharingManagementSystem.Entities.pdb
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/Debug/net8.0/ref/CarSharingManagementSystem.Entities.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\bin\Debug\net8.0\CarSharingManagementSystem.Entities.deps.json
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\bin\Debug\net8.0\CarSharingManagementSystem.Entities.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\bin\Debug\net8.0\CarSharingManagementSystem.Entities.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.AssemblyInfoInputs.cache
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.AssemblyInfo.cs
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.csproj.CoreCompileInputs.cache
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.sourcelink.json
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\refint\CarSharingManagementSystem.Entities.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\CarSharingManagementSystem.Entities.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Entities\obj\Debug\net8.0\ref\CarSharingManagementSystem.Entities.dll

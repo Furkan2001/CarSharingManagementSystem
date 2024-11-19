@@ -87,21 +87,3 @@ C:/Users/M. Esat/Desktop/Project/pr/CarSharingManagementSystem/server-side/CarSh
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/obj/Debug/net8.0/refint/CarSharingManagementSystem.Business.dll
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/obj/Debug/net8.0/CarSharingManagementSystem.Business.pdb
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/obj/Debug/net8.0/ref/CarSharingManagementSystem.Business.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.Business.deps.json
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.Business.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.Business.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.DataAccess.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.Entities.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.DataAccess.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\bin\Debug\net8.0\CarSharingManagementSystem.Entities.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.csproj.AssemblyReference.cache
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.AssemblyInfoInputs.cache
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.AssemblyInfo.cs
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.csproj.CoreCompileInputs.cache
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.sourcelink.json
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarShari.385C5ADE.Up2Date
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\refint\CarSharingManagementSystem.Business.dll
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\CarSharingManagementSystem.Business.pdb
-C:\Users\M. Esat\Desktop\Project\pr\CarSharingManagementSystem\server-side\CarSharingManagementSystem\CarSharingManagementSystem.Business\obj\Debug\net8.0\ref\CarSharingManagementSystem.Business.dll

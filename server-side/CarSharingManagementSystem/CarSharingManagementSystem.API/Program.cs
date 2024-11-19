@@ -6,6 +6,8 @@ using CarSharingManagementSystem.DataAccess.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using CarSharingManagementSystem.API.Middleware;
 using Microsoft.OpenApi.Models;
+using CarSharingManagementSystem.API.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,8 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IJourneyService, JourneyService>();
 
+builder.Services.AddSingleton<IUserIdProvider, IntegerUserIdProvider>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
@@ -47,6 +51,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CarSharingManagementSystem API", Version = "v1" });
 
+    // x-api-key başlığı
     c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
     {
         Description = "API Key gerekli. Örneğin: \"x-api-key: {API_KEY}\"",
@@ -54,6 +59,16 @@ builder.Services.AddSwaggerGen(c =>
         Name = "x-api-key",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "ApiKeyScheme"
+    });
+
+    // user_id başlığı
+    c.AddSecurityDefinition("UserId", new OpenApiSecurityScheme
+    {
+        Description = "User ID gerekli. Örneğin: \"user_id: {USER_ID}\"",
+        In = ParameterLocation.Header,
+        Name = "user_id",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "UserIdScheme"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -71,9 +86,25 @@ builder.Services.AddSwaggerGen(c =>
                 In = ParameterLocation.Header,
             },
             new List<string>()
+        },
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "UserId"
+                },
+                Scheme = "UserIdScheme",
+                Name = "user_id",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
         }
     });
 });
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -91,4 +122,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHub<MessageHub>("/messageHub");
+
 app.Run();
