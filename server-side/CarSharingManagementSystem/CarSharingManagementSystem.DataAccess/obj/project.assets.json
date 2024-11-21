@@ -4360,32 +4360,39 @@
     ]
   },
   "packageFolders": {
-    "/Users/furkan/.nuget/packages/": {}
+    "C:\\Users\\M. Esat\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
+      "projectUniqueName": "C:\\Users\\M. Esat\\Desktop\\Project\\pr\\CarSharingManagementSystem\\server-side\\CarSharingManagementSystem\\CarSharingManagementSystem.DataAccess\\CarSharingManagementSystem.DataAccess.csproj",
       "projectName": "CarSharingManagementSystem.DataAccess",
-      "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
-      "packagesPath": "/Users/furkan/.nuget/packages/",
-      "outputPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/obj/",
+      "projectPath": "C:\\Users\\M. Esat\\Desktop\\Project\\pr\\CarSharingManagementSystem\\server-side\\CarSharingManagementSystem\\CarSharingManagementSystem.DataAccess\\CarSharingManagementSystem.DataAccess.csproj",
+      "packagesPath": "C:\\Users\\M. Esat\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\M. Esat\\Desktop\\Project\\pr\\CarSharingManagementSystem\\server-side\\CarSharingManagementSystem\\CarSharingManagementSystem.DataAccess\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/furkan/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\M. Esat\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
-              "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
+            "C:\\Users\\M. Esat\\Desktop\\Project\\pr\\CarSharingManagementSystem\\server-side\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj": {
+              "projectPath": "C:\\Users\\M. Esat\\Desktop\\Project\\pr\\CarSharingManagementSystem\\server-side\\CarSharingManagementSystem\\CarSharingManagementSystem.Entities\\CarSharingManagementSystem.Entities.csproj"
             }
           }
         }
@@ -4450,7 +4457,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

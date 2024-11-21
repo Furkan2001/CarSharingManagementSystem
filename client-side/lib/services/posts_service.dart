@@ -2,16 +2,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PostsService {
+  static const String _baseUrl = 'http://localhost:5158/api';
+  static const String _apiKey = 'api12324';
+  static const String _userID = '2';
 
-   static const String _baseUrl = 'http://localhost:5158/api';
-   static const String _apiKey = 'api12324';
-   static const String _userID = '2';
+  // Common headers for all requests
+  static Map<String, String> get _headers => {
+        'Content-Type': 'application/json',
+        'x-api-key': _apiKey,
+        'user_id': _userID, // Adding user_id header
+      };
 
   // Fetch all journeys
   static Future<List<dynamic>> getAllJourneys() async {
     final response = await http.get(
       Uri.parse('$_baseUrl/Journeys/all'),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},
+      headers: _headers,
     );
 
     if (response.statusCode == 200) {
@@ -25,7 +31,8 @@ class PostsService {
   static Future<Map<String, dynamic>> getJourneyById(int id) async {
     final response = await http.get(
       Uri.parse('$_baseUrl/Journeys/$id'),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},);
+      headers: _headers,
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -38,7 +45,8 @@ class PostsService {
   static Future<List<dynamic>> getUsersJourneys() async {
     final response = await http.get(
       Uri.parse('$_baseUrl/Journeys/mine/$_userID'),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},);
+      headers: _headers,
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -49,11 +57,9 @@ class PostsService {
 
   // Create a new journey
   static Future<bool> createJourney(Map<String, dynamic> journey) async {
-
     final response = await http.post(
       Uri.parse('$_baseUrl/Journeys'),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},
-      
+      headers: _headers,
       body: jsonEncode(journey),
     );
 
@@ -64,7 +70,7 @@ class PostsService {
   static Future<bool> updateJourney(int id, Map<String, dynamic> updatedJourney) async {
     final response = await http.put(
       Uri.parse('$_baseUrl/Journeys/$id'),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},
+      headers: _headers,
       body: jsonEncode(updatedJourney),
     );
 
@@ -74,8 +80,10 @@ class PostsService {
 
   // Delete a journey by ID
   static Future<bool> deleteJourney(int id) async {
-    final response = await http.delete(Uri.parse('$_baseUrl/Journeys/$id'),
-    headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},);
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/Journeys/$id'),
+      headers: _headers,
+    );
 
     return response.statusCode == 200;
   }
