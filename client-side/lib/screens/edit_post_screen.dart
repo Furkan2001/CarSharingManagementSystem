@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
@@ -176,6 +178,16 @@ class _EditPostScreenState extends State<EditPostScreen> {
     }
   }
 
+
+  Future<void> _launchMap() async {
+    final Uri url = Uri.parse('https://www.google.com/maps');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   Future<void> _selectDateTime(BuildContext context) async {
   final DateTime? pickedDate = await showDatePicker(
     context: context,
@@ -223,11 +235,31 @@ class _EditPostScreenState extends State<EditPostScreen> {
               children: [
                 _buildFormSection(
                   label: 'Kalkış Yeri',
-                  child: _buildCoordinateField(_currentDistrict),
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildCoordinateField(_currentDistrict)),
+                      IconButton(
+                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        onPressed: () {
+                          _launchMap();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 _buildFormSection(
                   label: 'Varış Yeri',
-                  child: _buildCoordinateField(_destinationDistrict),
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildCoordinateField(_destinationDistrict)),
+                      IconButton(
+                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        onPressed: () {
+                          _launchMap();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
