@@ -11,6 +11,16 @@ using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add session services
+builder.Services.AddDistributedMemoryCache();  // Add in-memory caching for session
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // Set session timeout
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
@@ -45,73 +55,75 @@ builder.Services.AddSingleton<IUserIdProvider, IntegerUserIdProvider>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "CarSharingManagementSystem API", Version = "v1" });
 
-    // x-api-key başlığı
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
-    {
-        Description = "API Key gerekli. Örneğin: \"x-api-key: {API_KEY}\"",
-        In = ParameterLocation.Header,
-        Name = "x-api-key",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "ApiKeyScheme"
-    });
+    // // x-api-key başlığı
+    // c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    // {
+    //     Description = "API Key gerekli. Örneğin: \"x-api-key: {API_KEY}\"",
+    //     In = ParameterLocation.Header,
+    //     Name = "x-api-key",
+    //     Type = SecuritySchemeType.ApiKey,
+    //     Scheme = "ApiKeyScheme"
+    // });
 
-    // user_id başlığı
-    c.AddSecurityDefinition("UserId", new OpenApiSecurityScheme
-    {
-        Description = "User ID gerekli. Örneğin: \"user_id: {USER_ID}\"",
-        In = ParameterLocation.Header,
-        Name = "user_id",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "UserIdScheme"
-    });
+    // // user_id başlığı
+    // c.AddSecurityDefinition("UserId", new OpenApiSecurityScheme
+    // {
+    //     Description = "User ID gerekli. Örneğin: \"user_id: {USER_ID}\"",
+    //     In = ParameterLocation.Header,
+    //     Name = "user_id",
+    //     Type = SecuritySchemeType.ApiKey,
+    //     Scheme = "UserIdScheme"
+    // });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                },
-                Scheme = "ApiKeyScheme",
-                Name = "x-api-key",
-                In = ParameterLocation.Header,
-            },
-            new List<string>()
-        },
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "UserId"
-                },
-                Scheme = "UserIdScheme",
-                Name = "user_id",
-                In = ParameterLocation.Header,
-            },
-            new List<string>()
-        }
-    });
+    // c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    // {
+    //     {
+    //         new OpenApiSecurityScheme
+    //         {
+    //             Reference = new OpenApiReference
+    //             {
+    //                 Type = ReferenceType.SecurityScheme,
+    //                 Id = "ApiKey"
+    //             },
+    //             Scheme = "ApiKeyScheme",
+    //             Name = "x-api-key",
+    //             In = ParameterLocation.Header,
+    //         },
+    //         new List<string>()
+    //     },
+    //     {
+    //         new OpenApiSecurityScheme
+    //         {
+    //             Reference = new OpenApiReference
+    //             {
+    //                 Type = ReferenceType.SecurityScheme,
+    //                 Id = "UserId"
+    //             },
+    //             Scheme = "UserIdScheme",
+    //             Name = "user_id",
+    //             In = ParameterLocation.Header,
+    //         },
+    //         new List<string>()
+    //     }
+    // });
 });
 
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.UseSession();
+
 app.UseCors("AllowAllOrigins");
 
 // Add API Key Middleware
-app.UseMiddleware<ApiKeyMiddleware>();
+//app.UseMiddleware<ApiKeyMiddleware>();
 
 // Add Swagger
 if (app.Environment.IsDevelopment())
@@ -120,6 +132,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
