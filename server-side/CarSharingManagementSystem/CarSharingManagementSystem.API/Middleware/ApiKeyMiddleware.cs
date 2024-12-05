@@ -23,6 +23,12 @@ namespace CarSharingManagementSystem.API.Middleware
                 return;
             }
 
+            if (context.Request.Path.StartsWithSegments("/api/oauth"))
+            {
+                await _next(context);
+                return;
+            }
+
             // x-api-key kontrolü
             if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey))
             {
