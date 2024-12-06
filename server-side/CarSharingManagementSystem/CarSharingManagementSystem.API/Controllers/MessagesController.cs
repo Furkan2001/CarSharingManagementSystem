@@ -81,6 +81,19 @@ namespace CarSharingManagementSystem.Controllers
             return Ok(messageHistory);
         }
 
+        ///
+        ///
+        ///
+        [HttpGet("endmessages/{userId}")]
+        public async Task<IActionResult> GetEndUnreadedMessagesForAPerson(int userId)
+        {
+            var endMessagesForAPerson = await _messageService.GetEndUnreadedMessagesForAPerson(userId);
+            if (endMessagesForAPerson == null)
+                return NotFound(new { Message = "Not Found" });
+            
+            return Ok(endMessagesForAPerson);
+        }
+
         /// <summary>
         /// Delete a message
         /// </summary>

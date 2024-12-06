@@ -48,6 +48,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _messageRepository.MarkAsReadAsync(messageId);
         }
 
+        public async Task<IEnumerable<Message>> GetEndUnreadedMessagesForAPerson(int userId)
+        {
+            return await _messageRepository.GetEndUnreadedMessagesForAPerson(userId);
+        }
+
         public async Task<int> DeleteReadMessagesAsync()
         {
             return await _messageRepository.DeleteReadMessagesAsync();

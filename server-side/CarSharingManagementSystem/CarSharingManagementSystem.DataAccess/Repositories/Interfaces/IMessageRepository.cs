@@ -8,5 +8,6 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Interfaces
         Task<int> DeleteReadMessagesAsync();
         Task<IEnumerable<Message>>GetMessageHistoryAsync(int userId1, int userId2);
         Task<IEnumerable<Message>> GetUnreadMessagesAsync(int userId);
+        Task<IEnumerable<Message>> GetEndUnreadedMessagesForAPerson(int userId);
     }
 }

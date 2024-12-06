@@ -34,7 +34,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
         public async Task<IEnumerable<Message>>GetMessageHistoryAsync(int userId1, int userId2)
         {
             return await _context.Messages
-                .Where(m => m.SenderId == userId1 && m.ReceiverId == userId2)
+                .Where(m => (m.SenderId == userId1 && m.ReceiverId == userId2) || (m.SenderId == userId2 && m.ReceiverId == userId1))
                 .Include(m => m.Sender)
                 .Include(m => m.Receiver)
                 .ToListAsync();
@@ -87,6 +87,24 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 return true;
             }
             return false;
+        }
+
+        public async Task<IEnumerable<Message>> GetEndUnreadedMessagesForAPerson(int userId)
+        {
+            var messages = await _context.Messages
+                .Where(m => (m.SenderId == userId || m.ReceiverId == userId) && !m.IsRead)
+                .Include(m => m.Sender)
+                .Include(m => m.Receiver)
+                .ToListAsync();
+
+            // Gruplama işlemini bellekte yapıyoruz
+            var groupedMessages = messages
+                .GroupBy(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
+                .Select(g => g.OrderByDescending(m => m.Time).FirstOrDefault())
+                .Where(m => m != null)
+                .ToList();
+
+            return groupedMessages;
         }
 
         public async Task<int> DeleteReadMessagesAsync()
