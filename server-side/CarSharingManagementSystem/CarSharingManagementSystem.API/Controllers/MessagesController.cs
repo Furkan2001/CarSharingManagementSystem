@@ -47,16 +47,6 @@ namespace CarSharingManagementSystem.Controllers
         }
 
         /// <summary>
-        /// Get unreaded messages
-        /// </summary>
-        [HttpGet("unread/{userId}")]
-        public async Task<IActionResult> GetUnreadMessages(int userId)
-        {
-            var unreadMessages = await _messageService.GetUnreadMessagesAsync(userId);
-            return Ok(unreadMessages);
-        }
-
-        /// <summary>
         /// Point as readed to message
         /// </summary>
         [HttpPut("mark-as-read/{messageId}")]
@@ -81,9 +71,9 @@ namespace CarSharingManagementSystem.Controllers
             return Ok(messageHistory);
         }
 
-        ///
-        ///
-        ///
+        /// <summary>
+        /// Get last messages related with that user
+        /// <summary>
         [HttpGet("endmessages/{userId}")]
         public async Task<IActionResult> GetEndUnreadedMessagesForAPerson(int userId)
         {
@@ -97,31 +87,16 @@ namespace CarSharingManagementSystem.Controllers
         /// <summary>
         /// Delete a message
         /// </summary>
-        [HttpDelete("{messageId}")]
-        public async Task<IActionResult> DeleteMessage(int messageId)
+        [HttpDelete("delete/{userId1}/{userId2}")]
+        public async Task<IActionResult> DeleteMessagesBetweenTwoUsers(int userId1, int userId2)
         {
-            var result = await _messageService.DeleteAsync(messageId);
+            var result = await _messageService.DeleteMessagesBetweenTwoUsers(userId1, userId2);
             if (result == -1)
             {
-                return NotFound(new { Message = "Mesaj bulunamadı." });
+                return NotFound(new { Message = "Not Found." });
             }
 
             return Ok(new { Message = "Mesaj silindi." });
-        }
-
-        /// <summary>
-        /// Delete all readed messages
-        /// </summary>
-        [HttpDelete("delete-read")]
-        public async Task<IActionResult> DeleteReadMessages()
-        {
-            var result = await _messageService.DeleteReadMessagesAsync();
-            if (result == -1)
-            {
-                return BadRequest(new { Message = "Error in deleting all readed messages" });
-            }
-
-            return Ok(new { Message = "Success" });
         }
     }
 }

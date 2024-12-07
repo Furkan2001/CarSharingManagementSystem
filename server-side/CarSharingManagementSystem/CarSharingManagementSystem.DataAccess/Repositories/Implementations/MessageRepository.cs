@@ -40,15 +40,6 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Message>> GetUnreadMessagesAsync(int userId)
-        {
-            return await _context.Messages
-                .Where(m => m.ReceiverId == userId && m.IsRead == false)
-                .Include(m => m.Sender)
-                .Include(m => m.Receiver)
-                .ToListAsync();
-        }
-
         public async Task<int> AddAsync(Message message)
         {
             try
@@ -116,6 +107,24 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                     .ToListAsync();
 
                 _context.Messages.RemoveRange(readMessages);
+                await _context.SaveChangesAsync();
+                return 0;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+
+        public async Task<int> DeleteMessagesBetweenTwoUsers(int userId1, int userId2)
+        {
+            try
+            {
+                var messages = await _context.Messages
+                    .Where(m => ((m.SenderId == userId1 && m.ReceiverId == userId2) || (m.SenderId == userId2 && m.ReceiverId == userId1)))
+                    .ToListAsync();
+
+                _context.Messages.RemoveRange(messages);
                 await _context.SaveChangesAsync();
                 return 0;
             }

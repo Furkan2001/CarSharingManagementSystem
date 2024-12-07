@@ -25,12 +25,18 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
 
         public async Task<IEnumerable<Message>>GetMessageHistoryAsync(int userId1, int userId2)
         {
-            return await _messageRepository.GetMessageHistoryAsync(userId1, userId2);
-        }
+            var messages = await _messageRepository.GetMessageHistoryAsync(userId1, userId2);
 
-        public async Task<IEnumerable<Message>> GetUnreadMessagesAsync(int userId)
-        {
-            return await _messageRepository.GetUnreadMessagesAsync(userId);
+            if (messages != null)
+            {
+                foreach(var message in messages)
+                {
+                    await MarkAsReadAsync(message.MessageId);
+                }
+                await DeleteReadMessagesAsync();
+            }
+
+            return messages;
         }
 
         public async Task<int> AddAsync(Message message)
@@ -56,6 +62,11 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
         public async Task<int> DeleteReadMessagesAsync()
         {
             return await _messageRepository.DeleteReadMessagesAsync();
+        }
+
+        public async Task<int> DeleteMessagesBetweenTwoUsers(int userId1, int userId2)
+        {
+            return await _messageRepository.DeleteMessagesBetweenTwoUsers(userId1, userId2);
         }
 
         public async Task<int> DeleteAsync(int id)
