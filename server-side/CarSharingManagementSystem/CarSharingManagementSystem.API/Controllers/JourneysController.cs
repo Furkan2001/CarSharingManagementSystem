@@ -45,7 +45,17 @@ namespace CarSharingManagementSystem.Controllers
         [HttpGet("mine/{id}/{userId}")]
         public async Task<IActionResult> GetMyJourneyWithRequests(int id, int userId)
         {
-            var journey = await _journeyService.GetByIdAndUserIdAsync(id, userId);
+            var journey = await _journeyService.GetReceiverByIdAndUserIdAsync(id, userId);
+            if (journey == null)
+                return NotFound();
+            return Ok(journey);
+        }
+
+        // GET: api/Journey/mine
+        [HttpGet("other/{id}/{userId}")]
+        public async Task<IActionResult> GetOtherJourneyWithRequests(int id, int userId)
+        {
+            var journey = await _journeyService.GetSenderByIdAndUserIdAsync(id, userId);
             if (journey == null)
                 return NotFound();
             return Ok(journey);

@@ -32,10 +32,16 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _journeyRepository.GetByUserIdAsync(userId);
         }
 
-        public async Task<Journey> GetByIdAndUserIdAsync(int id, int userId)
+        public async Task<Journey> GetReceiverByIdAndUserIdAsync(int id, int userId)
         {
             await _requestRepository.CleanupDeletedRequestsAsync();
-            return await _journeyRepository.GetByIdAndUserIdAsync(id, userId);
+            return await _journeyRepository.GetReceiverByIdAndUserIdAsync(id, userId);
+        }
+
+        public async Task<Journey> GetSenderByIdAndUserIdAsync(int id, int userId)
+        {
+            await _requestRepository.CleanupDeletedRequestsAsync();
+            return await _journeyRepository.GetSenderByIdAndUserIdAsync(id, userId);
         }
 
         public async Task<int> AddAsync(Journey journey)

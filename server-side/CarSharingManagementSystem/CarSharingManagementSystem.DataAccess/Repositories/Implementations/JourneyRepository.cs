@@ -39,7 +39,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
         }
 
         // Eğer kullanıcı kendi postuna bakacaksa bu fonksiyonu kullanmalıdır, çünkü isteklerde altında verilecek.
-        public async Task<Journey> GetByIdAndUserIdAsync(int id, int userId)
+        public async Task<Journey> GetSenderByIdAndUserIdAsync(int id, int userId)
         {
             return await _context.Journeys
                 .Include(j => j.User)
@@ -47,22 +47,47 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 .Include(j => j.Requests.Where(r =>
                     r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
                     (
-                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
-                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                        r.SenderId == userId && !r.SenderIsDeleted
                     )))
                     .ThenInclude(r => r.Sender) // Gönderen kullanıcı bilgisi
                 .Include(j => j.Requests.Where(r =>
                     r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
                     (
-                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
-                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                        r.SenderId == userId && !r.SenderIsDeleted
                     )))
                     .ThenInclude(r => r.Receiver) // Alıcı kullanıcı bilgisi
                 .Include(j => j.Requests.Where(r =>
                     r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
                     (
-                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
-                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                        r.SenderId == userId && !r.SenderIsDeleted
+                    )))
+                    .ThenInclude(r => r.Status) // Request durumu
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .FirstOrDefaultAsync(j => j.JourneyId == id);
+        }
+
+        public async Task<Journey> GetReceiverByIdAndUserIdAsync(int id, int userId)
+        {
+            return await _context.Journeys
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        r.ReceiverId == userId && !r.ReceiverIsDeleted
+                    )))
+                    .ThenInclude(r => r.Sender) // Gönderen kullanıcı bilgisi
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        r.ReceiverId == userId && !r.ReceiverIsDeleted
+                    )))
+                    .ThenInclude(r => r.Receiver) // Alıcı kullanıcı bilgisi
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        r.ReceiverId == userId && !r.ReceiverIsDeleted
                     )))
                     .ThenInclude(r => r.Status) // Request durumu
                 .Include(j => j.JourneyDays)
