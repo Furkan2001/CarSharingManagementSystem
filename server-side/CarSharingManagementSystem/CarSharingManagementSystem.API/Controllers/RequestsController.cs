@@ -87,32 +87,31 @@ namespace CarSharingManagementSystem.Controllers
 
             try
             {
-                var tempRequest = await _requestService.GetByIdAsync(id);
-                if (tempRequest.Status.StatusId == 1 && request.Status.StatusId == 2)
+                if (request == null || request.RequestId != id)
                 {
-                    var receiver = await _userService.GetByIdAsync(tempRequest.ReceiverId);
-                    if (receiver != null)
-                    {
-                        receiver.SustainabilityPoint += 100;
-                        await _userService.UpdateAsync(receiver);
-                    }
-
-                    var sender = await _userService.GetByIdAsync(tempRequest.SenderId);
-                    if (sender != null)
-                    {
-                        sender.SustainabilityPoint += 100;
-                        await _userService.UpdateAsync(sender);
-                    }
+                    return BadRequest("Invalid request data.");
                 }
 
-                var result = await _requestService.UpdateAsync(request);
+                var existingRequest = await _requestService.GetByIdAsync(id);
+                if (existingRequest == null)
+                {
+                    return NotFound("Request not found.");
+                }
 
+                existingRequest.JourneyId = request.JourneyId;
+                existingRequest.SenderId = request.SenderId;
+                existingRequest.ReceiverId = request.ReceiverId;
+                existingRequest.Time = request.Time;
+                existingRequest.StatusId = request.StatusId;
+                existingRequest.ReceiverIsDeleted = request.ReceiverIsDeleted;
+                existingRequest.SenderIsDeleted = request.SenderIsDeleted;
+
+                var result = await _requestService.UpdateAsync(existingRequest);
                 if (result == -1)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Error updating request.");
                 }
 
-                // Başarılı durumda hiçbir içerik dönmeden NoContent (204) döner
                 return NoContent();
             }
             catch (Exception ex)

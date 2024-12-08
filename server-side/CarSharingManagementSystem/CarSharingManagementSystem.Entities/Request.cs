@@ -33,12 +33,12 @@ namespace CarSharingManagementSystem.Entities
 
         // Navigation properties
         [ForeignKey("SenderId")]
-        public User Sender { get; set; }
+        public User? Sender { get; set; }
 
         [ForeignKey("ReceiverId")]
-        public User Receiver { get; set; }
+        public User? Receiver { get; set; }
 
         [ForeignKey("StatusId")]
-        public Status Status { get; set; }
+        public Status? Status { get; set; }
     }
 }
