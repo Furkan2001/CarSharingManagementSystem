@@ -38,6 +38,38 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                 .FirstOrDefaultAsync(j => j.JourneyId == id);
         }
 
+        // Eğer kullanıcı kendi postuna bakacaksa bu fonksiyonu kullanmalıdır, çünkü isteklerde altında verilecek.
+        public async Task<Journey> GetByIdAndUserIdAsync(int id, int userId)
+        {
+            return await _context.Journeys
+                .Include(j => j.User)
+                .Include(j => j.Map)
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
+                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                    )))
+                    .ThenInclude(r => r.Sender) // Gönderen kullanıcı bilgisi
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
+                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                    )))
+                    .ThenInclude(r => r.Receiver) // Alıcı kullanıcı bilgisi
+                .Include(j => j.Requests.Where(r =>
+                    r.JourneyId == id && // Request'in JourneyId'si belirtilen id ile eşleşmeli
+                    (
+                        (r.SenderId == userId && !r.SenderIsDeleted) || // Silinmemiş gönderici
+                        (r.ReceiverId == userId && !r.ReceiverIsDeleted) // Silinmemiş alıcı
+                    )))
+                    .ThenInclude(r => r.Status) // Request durumu
+                .Include(j => j.JourneyDays)
+                    .ThenInclude(jd => jd.Day)
+                .FirstOrDefaultAsync(j => j.JourneyId == id && j.UserId == userId);
+        }
+
         public async Task<IEnumerable<Journey>> GetByUserIdAsync(int userId)
         {
             return await _context.Journeys
@@ -210,7 +242,12 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                     .Distinct();
 
                 var journeyIdsToDelete = expiredJourneys
-                    .Select(j => j.JourneyId);
+                    .Select(j => j.JourneyId)
+                    .ToList();
+                
+                var requestsToDelete = await _context.Requests
+                    .Where(r => journeyIdsToDelete.Contains(r.JourneyId))
+                    .ToListAsync();
 
                 var mapsToDelete = await _context.Maps
                     .Where(m => mapIdsToDelete.Contains(m.MapId))
@@ -220,6 +257,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
                     .Where(jd => journeyIdsToDelete.Contains(jd.JourneyId))
                     .ToListAsync();
 
+                _context.Requests.RemoveRange(requestsToDelete);
                 _context.Maps.RemoveRange(mapsToDelete);
                 _context.JourneyDays.RemoveRange(journeyDaysToDelete);
                 _context.Journeys.RemoveRange(expiredJourneys);

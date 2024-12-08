@@ -32,9 +32,6 @@ namespace CarSharingManagementSystem.Entities
         public bool SenderIsDeleted { get; set; } = false;
 
         // Navigation properties
-        [ForeignKey("JourneyId")]
-        public Journey Journey { get; set; }
-
         [ForeignKey("SenderId")]
         public User Sender { get; set; }
 

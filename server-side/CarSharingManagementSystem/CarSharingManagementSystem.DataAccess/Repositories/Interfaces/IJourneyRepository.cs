@@ -12,6 +12,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Interfaces
         Task<IEnumerable<Journey>> GetAccordingToStartAndDestinationLocation(string startDistrict, string destinationDistrict);
         Task<IEnumerable<Journey>> GetAccordingToTime(DateTime start, DateTime end);
         Task<IEnumerable<Journey>> GetFilteredJourneysAsync(JourneyFilterModel filterModel);
+        Task<Journey> GetByIdAndUserIdAsync(int id, int userId);
         Task AutoDeleteAsync();
     }
 }

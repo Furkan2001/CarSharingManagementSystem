@@ -14,5 +14,7 @@ namespace CarSharingManagementSystem.DataAccess
         public DbSet<JourneyDay> JourneyDays { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Map> Maps { get; set; }
+        public DbSet<Request> Requests { get; set; }
+        public DbSet<Status> Statuses {get; set; }
     }
 }

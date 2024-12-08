@@ -7,6 +7,7 @@ namespace CarSharingManagementSystem.Business.Services.Interfaces
     {
         Task<IEnumerable<Journey>> GetByUserIdAsync(int userId);
         Task<IEnumerable<Journey>> GetFilteredJourneysAsync(JourneyFilterModel filterModel);
+        Task<Journey> GetByIdAndUserIdAsync(int id, int userId);
         Task AutoDeleteAsync();
     }
 }

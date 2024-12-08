@@ -41,16 +41,26 @@ namespace CarSharingManagementSystem.Controllers
             return Ok(journeys);
         }
 
+        // GET: api/Journey/mine
+        [HttpGet("mine/{id}/{userId}")]
+        public async Task<IActionResult> GetMyJourneyWithRequests(int id, int userId)
+        {
+            var journey = await _journeyService.GetByIdAndUserIdAsync(id, userId);
+            if (journey == null)
+                return NotFound();
+            return Ok(journey);
+        }
+
         // GET: api/Journey/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJourneyById(int id)
         {
             await _journeyService.AutoDeleteAsync();
             var journey = await _journeyService.GetByIdAsync(id);
+
             if (journey == null)
-            {
                 return NotFound();
-            }
+
             return Ok(journey);
         }
 

@@ -28,6 +28,7 @@ namespace CarSharingManagementSystem.Entities
         // Navigation properties
         public User? User { get; set; }
         public Map Map { get; set; }
+        public ICollection<Request>? Requests { get; set; }
         public ICollection<JourneyDay> JourneyDays { get; set; }
     }
 }
