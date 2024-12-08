@@ -13,10 +13,12 @@ namespace CarSharingManagementSystem.Controllers
     public class RequestsController : ControllerBase
     {
         private readonly IRequestService _requestService;
+        private readonly IUserService _userService;
 
-        public RequestsController(IRequestService requestService)
+        public RequestsController(IRequestService requestService, IUserService userService)
         {
             _requestService = requestService;
+            _userService = userService;
         }
 
         // GET: api/Request
@@ -85,6 +87,24 @@ namespace CarSharingManagementSystem.Controllers
 
             try
             {
+                var tempRequest = await _requestService.GetByIdAsync(id);
+                if (tempRequest.Status.StatusId == 1 && request.Status.StatusId == 2)
+                {
+                    var receiver = await _userService.GetByIdAsync(tempRequest.ReceiverId);
+                    if (receiver != null)
+                    {
+                        receiver.SustainabilityPoint += 100;
+                        await _userService.UpdateAsync(receiver);
+                    }
+
+                    var sender = await _userService.GetByIdAsync(tempRequest.SenderId);
+                    if (sender != null)
+                    {
+                        sender.SustainabilityPoint += 100;
+                        await _userService.UpdateAsync(sender);
+                    }
+                }
+
                 var result = await _requestService.UpdateAsync(request);
 
                 if (result == -1)
