@@ -41,9 +41,9 @@ namespace CarSharingManagementSystem.Entities
         public bool IsAdministrativeStaff { get; set; }
 
         [Column("sustainability_point")]
-        public int SustainabilityPoint { get; set; }
+        public int? SustainabilityPoint { get; set; }
 
         [Column("api_key")]
-        public string apiKey {get; set; }
+        public string? apiKey {get; set; }
     }
 }

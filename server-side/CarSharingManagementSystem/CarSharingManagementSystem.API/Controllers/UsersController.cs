@@ -36,6 +36,7 @@ namespace CarSharingManagementSystem.Controllers
             }
 
             _user.apiKey = ApiKeyGenerator.GenerateApiKey();
+            _user.SustainabilityPoint = 0;
             await _userService.AddAsync(_user);
 
             var tempUser = await _userService.GetUserByEmailAsync(_user.Email);
