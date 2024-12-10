@@ -23,7 +23,7 @@ namespace CarSharingManagementSystem.API.Middleware
                 return;
             }
 
-            if (context.Request.Path.StartsWithSegments("/api/oauth"))
+            if (context.Request.Path.StartsWithSegments("/auth"))
             {
                 await _next(context);
                 return;

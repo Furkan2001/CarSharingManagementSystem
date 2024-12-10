@@ -6,19 +6,20 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.Collections.Generic;  // Make sure to import this for Dictionary
+using System.Collections.Generic;
 
 namespace CarSharingManagementSystem.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class OAuthController : ControllerBase
     {
         private readonly string clientId = "FB387A2ABDDD423586FFB6ED157762BB";
         private readonly string clientSecret = "3FF64BC099174847A5FB2EF22E1D0930";
-        private readonly string redirectUri = "http://localhost:3000/api/oauth/auth";
+        private readonly string redirectUri = "http://localhost:3000/auth";
         private readonly string authorizationEndpoint = "https://kampus.gtu.edu.tr/oauth/yetki";
         private readonly string tokenEndpoint = "https://kampus.gtu.edu.tr/oauth/dogrulama";
+        private readonly string queryServerAddress = "https://kampus.gtu.edu.tr/oauth/sorgu";
 
 
         [HttpGet("login")]
@@ -30,10 +31,11 @@ namespace CarSharingManagementSystem.Controllers
             var codeChallenge = GenerateCodeChallenge(codeVerifier);
 
             Console.WriteLine($"codeVerifier: {codeVerifier}");
+            Console.WriteLine($"Received State: {state}");
 
             // Store values in cookies (client-side)
-            Response.Cookies.Append("state", state, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
-            Response.Cookies.Append("codeVerifier", codeVerifier, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
+            Response.Cookies.Append("state", state, new CookieOptions { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax });
+            Response.Cookies.Append("codeVerifier", codeVerifier, new CookieOptions { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax });
 
             // Construct authorization URL
             var authorizationUrl = $"{authorizationEndpoint}?response_type=code" +
@@ -53,6 +55,8 @@ namespace CarSharingManagementSystem.Controllers
             var storedState = Request.Cookies["state"];
             var storedCodeVerifier = Request.Cookies["codeVerifier"];
 
+            Console.WriteLine($"Stored State: {storedState}");
+
             if (storedState == null || storedCodeVerifier == null)
             {
                 return BadRequest("Missing state or codeVerifier.");
@@ -65,10 +69,45 @@ namespace CarSharingManagementSystem.Controllers
 
             Console.WriteLine($"codeVerifier: {storedCodeVerifier}");
 
-            // Exchange code for token using stored codeVerifier
-            var token = await ExchangeCodeForToken(code, storedCodeVerifier);
+            try
+            {
+                // 1. Access token al
+                var accessToken = await ExchangeCodeForToken(code, storedCodeVerifier);
+                Console.WriteLine($"Access Token: {accessToken}");
 
-            return Ok(token);
+                // 2. Access token ile kullanıcı bilgilerini al
+                using (var httpClient = new HttpClient())
+                {
+                    var requestData = new Dictionary<string, string>
+                    {
+                        { "client_id", clientId },
+                        { "access_token", accessToken },
+                        { "kapsam", "GENEL" }
+                    };
+
+                    var jsonData = JsonConvert.SerializeObject(requestData);
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PostAsync(queryServerAddress, content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Error response: {errorContent}");
+                        return StatusCode((int)response.StatusCode, $"Error fetching user info: {errorContent}");
+                    }
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var userInfo = JsonConvert.DeserializeObject(responseContent);
+
+                    // 3. Kullanıcı bilgilerini döndür
+                    return Ok(userInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            }
         }
 
 
@@ -129,31 +168,35 @@ namespace CarSharingManagementSystem.Controllers
                           .Replace('/', '_');
         }
 
-        // Generate a code verifier for PKCE
-        private string GenerateCodeVerifier()
+        // Generate a random 'code_verifier' for PKCE
+        public static string GenerateCodeVerifier()
         {
-            // var rng = new Random();
-            // var codeVerifier = new byte[64];  // Code verifier length must be between 43 and 128 bytes
-            // rng.NextBytes(codeVerifier);
-            // return Convert.ToBase64String(codeVerifier)
-            //               .TrimEnd('=')
-            //               .Replace('+', '-')
-            //               .Replace('/', '_');
+            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
+            var random = new Random();
+            var codeVerifier = new char[64]; // Default length is 64, can be adjusted between 43-128
 
-            return "FNWNCOMVBMOSXJVVWOQECEMZHEAYQXYCDDOUXTPIZVWHOMPMZU";
+            for (int i = 0; i < codeVerifier.Length; i++)
+            {
+                codeVerifier[i] = chars[random.Next(chars.Length)];
+            }
+
+            return new string(codeVerifier);
         }
 
-        // Generate a code challenge (SHA-256 of the code verifier)
-        private string GenerateCodeChallenge(string codeVerifier)
+        // Generate a 'code_challenge' using SHA256 hash and Base64 encoding
+        public static string GenerateCodeChallenge(string codeVerifier)
         {
-            // using (var sha256 = SHA256.Create())
-            // {
-            //     byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
-            //     string base64Hash = Convert.ToBase64String(hashBytes);
-            //     return Uri.EscapeDataString(base64Hash);
-            // }
+            using (var sha256 = SHA256.Create())
+            {
+                // SHA256 hash hesaplama
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
+                
+                // Base64 kodlama (standard)
+                string base64Hash = Convert.ToBase64String(hashBytes);
 
-            return "SPWVMuTi7LDzOSSbVtRs3eD3mm4oGMeKXpq19kaBLqk%3D";
+                // URI encoding (percent-encode)
+                return Uri.EscapeDataString(base64Hash);
+            }
         }
     }
 }

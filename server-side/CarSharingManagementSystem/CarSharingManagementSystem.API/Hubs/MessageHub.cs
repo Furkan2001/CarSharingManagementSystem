@@ -60,6 +60,5 @@ namespace CarSharingManagementSystem.API.Hubs
                 });
             }
         }
-
     }
 }
