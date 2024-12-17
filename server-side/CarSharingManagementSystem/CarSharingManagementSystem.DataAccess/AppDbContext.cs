@@ -16,5 +16,6 @@ namespace CarSharingManagementSystem.DataAccess
         public DbSet<Map> Maps { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<Status> Statuses {get; set; }
+        public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
     }
 }

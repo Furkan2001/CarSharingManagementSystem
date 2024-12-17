@@ -8,6 +8,9 @@ using CarSharingManagementSystem.API.Middleware;
 using Microsoft.OpenApi.Models;
 using CarSharingManagementSystem.API.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +60,12 @@ builder.Services.AddSingleton<IUserIdProvider, IntegerUserIdProvider>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Firebase'i başlat
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("Private/carsharing-961ea-firebase-adminsdk-im372-c79318efec.json")
+});
 
 builder.Services.AddSwaggerGen(c =>
 {

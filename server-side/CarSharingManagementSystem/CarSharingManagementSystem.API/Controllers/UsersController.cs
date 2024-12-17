@@ -11,10 +11,12 @@ namespace CarSharingManagementSystem.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IUserDeviceTokenService _userDeviceTokenService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IUserDeviceTokenService userDeviceTokenService)
         {
             _userService = userService;
+            _userDeviceTokenService = userDeviceTokenService;
         }
 
         [HttpGet]
@@ -45,6 +47,13 @@ namespace CarSharingManagementSystem.Controllers
                 return Ok(tempUser);
 
             return Ok();
+        }
+
+        [HttpPost("save-device-token")]
+        public async Task<IActionResult> SaveDeviceToken(int userId, string deviceToken)
+        {
+            await _userDeviceTokenService.AddDeviceTokenAsync(userId, deviceToken);
+            return Ok(new { message = "Cihaz token'ı kaydedildi." });
         }
     }
 }

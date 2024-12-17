@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj": {}
+    "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj": {}
   },
   "projects": {
-    "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj": {
+    "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj",
+        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj",
         "projectName": "CarSharingManagementSystem.API",
-        "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj",
+        "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/CarSharingManagementSystem.API.csproj",
         "packagesPath": "/Users/furkan/.nuget/packages/",
-        "outputPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/obj/",
+        "outputPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/furkan/.nuget/NuGet/NuGet.Config"
@@ -26,14 +26,14 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj"
               },
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj"
               },
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
               }
             }
           }
@@ -53,6 +53,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "FirebaseAdmin": {
+              "target": "Package",
+              "version": "[3.1.0, )"
+            },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.68.0, )"
+            },
             "Microsoft.AspNetCore.SignalR": {
               "target": "Package",
               "version": "[1.1.0, )"
@@ -85,14 +93,14 @@
         }
       }
     },
-    "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj": {
+    "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj",
+        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj",
         "projectName": "CarSharingManagementSystem.Business",
-        "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj",
+        "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/CarSharingManagementSystem.Business.csproj",
         "packagesPath": "/Users/furkan/.nuget/packages/",
-        "outputPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/obj/",
+        "outputPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Business/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/furkan/.nuget/NuGet/NuGet.Config"
@@ -107,11 +115,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj"
               },
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
               }
             }
           }
@@ -150,14 +158,14 @@
         }
       }
     },
-    "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
+    "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
+        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
         "projectName": "CarSharingManagementSystem.DataAccess",
-        "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
+        "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/CarSharingManagementSystem.DataAccess.csproj",
         "packagesPath": "/Users/furkan/.nuget/packages/",
-        "outputPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/obj/",
+        "outputPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.DataAccess/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/furkan/.nuget/NuGet/NuGet.Config"
@@ -172,8 +180,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
-                "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
+              "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
+                "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj"
               }
             }
           }
@@ -242,14 +250,14 @@
         }
       }
     },
-    "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
+    "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
+        "projectUniqueName": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
         "projectName": "CarSharingManagementSystem.Entities",
-        "projectPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
+        "projectPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
         "packagesPath": "/Users/furkan/.nuget/packages/",
-        "outputPath": "/Users/furkan/Desktop/CarSharingProject/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/",
+        "outputPath": "/Users/furkan/Desktop/CarSharingProject/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/furkan/.nuget/NuGet/NuGet.Config"
