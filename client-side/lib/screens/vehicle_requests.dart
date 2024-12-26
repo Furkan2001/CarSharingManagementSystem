@@ -31,9 +31,11 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
 
   Future<void> _fetchJourneys() async {
     try {
+      int currentUserId = 2;
       final journeys = await PostsService.getAllJourneys();
       setState(() {
-        _journeys = journeys.where((journey) => journey['hasVehicle'] == false).toList();
+        _journeys = journeys.where((journey) =>
+          journey['hasVehicle'] == false && journey['userId'] != currentUserId).toList();
         _isLoading = false;
       });
     } catch (e) {

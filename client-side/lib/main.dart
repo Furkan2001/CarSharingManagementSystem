@@ -4,6 +4,8 @@ import 'screens/vehicle_posts.dart';
 import 'screens/vehicle_requests.dart';
 import 'screens/create_post_screen.dart';
 import 'screens/your_posts_screen.dart';
+import 'screens/messages_screen.dart';
+import 'screens/my_requests.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +29,8 @@ class MyApp extends StatelessWidget {
         '/requests': (context) => const VehicleRequestsScreen(),
         '/create_post': (context) => const CreatePostScreen(),
         '/your_posts': (context) => const YourPostsScreen(),
+        '/messages': (context) => MessagesScreen(),
+        '/my_requests': (context) => const MyRequestsScreen(userId: 2,),
       }
     );
   }

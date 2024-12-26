@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "I9dUp8D1U4w/R6hF83TbEEqNEsTXVjeaRY3DBO/zclQ=",
+  "Hash": "/QYPp/bTS+elwDxUng2uekZCbADb1r8ptX/CY65/3FY=",
   "Source": "CarSharingManagementSystem.API",
   "BasePath": "_content/CarSharingManagementSystem.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

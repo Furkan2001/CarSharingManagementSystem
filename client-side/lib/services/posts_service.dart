@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PostsService {
-  static const String _baseUrl = 'http://localhost:5158/api';
+  static const String _baseUrl = 'http://localhost:3000/api';
   static const String _apiKey = 'api12324';
-  static const String _userID = '2';
+  static const String _userID = '1';
 
   // Common headers for all requests
   static Map<String, String> get _headers => {
@@ -30,7 +30,21 @@ class PostsService {
   // Fetch a specific journey by ID
   static Future<Map<String, dynamic>> getJourneyById(int id) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/Journeys/$id'),
+      Uri.parse('$_baseUrl/Journeys/other/$id/$_userID'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Journey not found');
+    }
+  }
+
+  // Fetch a specific journey by ID
+  static Future<Map<String, dynamic>> getMyJourneyById(int id) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/Journeys/mine/$id/$_userID'),
       headers: _headers,
     );
 
@@ -67,14 +81,14 @@ class PostsService {
   }
 
   // Update an existing journey by ID
-  static Future<bool> updateJourney(int id, Map<String, dynamic> updatedJourney) async {
+  static Future<bool> updateJourney(
+      int id, Map<String, dynamic> updatedJourney) async {
     final response = await http.put(
       Uri.parse('$_baseUrl/Journeys/$id'),
       headers: _headers,
       body: jsonEncode(updatedJourney),
     );
 
-    print(updatedJourney);
     return response.statusCode == 204;
   }
 

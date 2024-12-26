@@ -11,6 +11,8 @@ class Menu extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
+
+            const SizedBox(height: 30),
             _buildMenuItem(
               context: context,
               title: 'Paylaşımları Gör',
@@ -40,6 +42,22 @@ class Menu extends StatelessWidget {
               title: 'Paylaşımlarım',
               icon: Icons.person,
               routeName: '/your_posts',
+              iconColor: const Color.fromARGB(255, 153, 153, 153),
+              textColor: Colors.white,
+            ),
+            _buildMenuItem(
+              context: context,
+              title: 'Mesajlaşmalar',
+              icon: Icons.message,
+              routeName: '/messages',
+              iconColor: const Color.fromARGB(255, 153, 153, 153),
+              textColor: Colors.white,
+            ),
+            _buildMenuItem(
+              context: context,
+              title: 'İsteklerim',
+              icon: Icons.output,
+              routeName: '/my_requests',
               iconColor: const Color.fromARGB(255, 153, 153, 153),
               textColor: Colors.white,
             ),

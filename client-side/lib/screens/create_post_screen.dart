@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
+import 'map_screen.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({Key? key}) : super(key: key);
@@ -23,6 +21,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool _hasVehicle = true;
   bool _isOneTime = true;
   bool _isLocaleInitialized = false;
+
+  String? _departureLatitude;
+  String? _departureLongitude;
+  String? _destinationLatitude;
+  String? _destinationLongitude;
 
   final Map<String, bool> _selectedDays = {
     "Monday": false,
@@ -75,12 +78,34 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  Future<void> _launchMap() async {
-    final Uri url = Uri.parse('https://www.google.com/maps');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      throw 'Could not launch $url';
+  Future<void> _launchMap(
+      TextEditingController controller, String field) async {
+    final Map<String, dynamic>? result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    if (result != null) {
+      setState(() {
+        final coordinates = result['coordinates'];
+        final latitude = coordinates['latitude'];
+        final longitude = coordinates['longitude'];
+        final locationName = result['locationName'];
+
+        // Update the controller with the location name
+        controller.text = locationName ?? 'Unknown location';
+
+        // Store latitude and longitude based on the field type
+        if (field == 'departure') {
+          _departureLatitude = latitude.toString();
+          _departureLongitude = longitude.toString();
+        } else if (field == 'destination') {
+          _destinationLatitude = latitude.toString();
+          _destinationLongitude = longitude.toString();
+        }
+
+        print('Selected Coordinates: $latitude, $longitude');
+      });
     }
   }
 
@@ -92,13 +117,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         "mapId": 0,
         "time": _selectedTime?.toIso8601String(),
         "isOneTime": _isOneTime,
-        "userId": 2,
+        "userId": 1,
         "map": {
           "mapId": 0,
-          "destinationLatitude": "41.008",
-          "destinationLongitude": "29.345",
-          "departureLatitude": "40.786",
-          "departureLongitude": "29.678",
+          "destinationLatitude": _destinationLatitude,
+          "destinationLongitude": _destinationLongitude,
+          "departureLatitude": _departureLatitude,
+          "departureLongitude": _departureLongitude,
           "mapRoute": "Route",
           "currentDistrict": _currentDistrict.text,
           "destinationDistrict": _destinationDistrict.text,
@@ -130,6 +155,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             _hasVehicle = true;
             _isOneTime = true;
             _selectedDays.updateAll((key, value) => false);
+            _departureLatitude = null;
+            _departureLongitude = null;
+            _destinationLatitude = null;
+            _destinationLongitude = null;
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -189,9 +218,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     children: [
                       Expanded(child: _buildCoordinateField(_currentDistrict)),
                       IconButton(
-                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        icon: const Icon(Icons.add_location_alt,
+                            color: Colors.white),
                         onPressed: () {
-                          _launchMap();
+                          _launchMap(_currentDistrict, 'departure');
                         },
                       ),
                     ],
@@ -201,33 +231,38 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   label: 'Varış Yeri',
                   child: Row(
                     children: [
-                      Expanded(child: _buildCoordinateField(_destinationDistrict)),
+                      Expanded(
+                          child: _buildCoordinateField(_destinationDistrict)),
                       IconButton(
-                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        icon: const Icon(Icons.add_location_alt,
+                            color: Colors.white),
                         onPressed: () {
-                          _launchMap();
+                          _launchMap(_destinationDistrict, 'destination');
                         },
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: ListTile(
-                      tileColor: const Color(0xFF2E3B4E), // Optional background color for consistency
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      title: Text(
-                        _selectedTime != null
-                            ? DateFormat('dd MMMM yyyy HH:mm', 'tr').format(_selectedTime!)
-                            : 'Kalkış Saati Seç',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      trailing: const Icon(Icons.access_time, color: Colors.white),
-                      onTap: () => _selectDateTime(context),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: ListTile(
+                    tileColor: const Color(
+                        0xFF2E3B4E), // Optional background color for consistency
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    title: Text(
+                      _selectedTime != null
+                          ? DateFormat('dd MMMM yyyy HH:mm', 'tr')
+                              .format(_selectedTime!)
+                          : 'Kalkış Saati Seç',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing:
+                        const Icon(Icons.access_time, color: Colors.white),
+                    onTap: () => _selectDateTime(context),
                   ),
+                ),
                 const SizedBox(height: 16),
                 _buildFormSwitch(
                   label: 'Aracınız var mı?',
@@ -240,33 +275,36 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   onChanged: (value) => setState(() => _isOneTime = value),
                 ),
                 if (!_isOneTime)
-                 _buildFormSection(
-                      label: 'Günler',
-                      child: Column(
-                        children: _selectedDays.keys.map((day) {
-                          return CheckboxListTile(
-                            title: Text(
-                              day,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            value: _selectedDays[day],
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _selectedDays[day] = value ?? false;
-                              });
-                            },
-                            checkColor: Colors.white, // Color for the check inside the box
-                            activeColor: const Color.fromARGB(255, 6, 30, 69), // Color when checked
-                            tileColor: const Color(0xFF2E3B4E), // Background color for the tile
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            side: const BorderSide(color: Colors.white), // Makes unchecked box white
-                          );
-                        }).toList(),
-                      ),
+                  _buildFormSection(
+                    label: 'Günler',
+                    child: Column(
+                      children: _selectedDays.keys.map((day) {
+                        return CheckboxListTile(
+                          title: Text(
+                            day,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          value: _selectedDays[day],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _selectedDays[day] = value ?? false;
+                            });
+                          },
+                          checkColor: Colors
+                              .white, // Color for the check inside the box
+                          activeColor: const Color.fromARGB(
+                              255, 6, 30, 69), // Color when checked
+                          tileColor: const Color(
+                              0xFF2E3B4E), // Background color for the tile
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          side: const BorderSide(
+                              color: Colors.white), // Makes unchecked box white
+                        );
+                      }).toList(),
                     ),
-
+                  ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _submitForm,

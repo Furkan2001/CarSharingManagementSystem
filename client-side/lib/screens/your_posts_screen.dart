@@ -5,6 +5,7 @@ import '../widgets/custom_appbar.dart';
 import 'package:intl/date_symbol_data_local.dart'; 
 import 'package:intl/intl.dart';
 import '../services/posts_service.dart';
+import 'request_screen.dart'; // Ensure this is properly imported
 
 class YourPostsScreen extends StatefulWidget {
   const YourPostsScreen({Key? key}) : super(key: key);
@@ -72,7 +73,7 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
           child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _yourPosts.isEmpty
-              ? const Center(child: Text('Henüz bir paylaşım oluşturmadınız.'))
+              ? const Center(child: Text('Henüz bir paylaşım oluşturmadınız.'),)
               : ListView.builder(
                   itemCount: _yourPosts.length,
                   itemBuilder: (context, index) {
@@ -161,6 +162,28 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ),
+                                 ElevatedButton(
+                                    onPressed: () {
+                                        // Navigate to the new RequestPage when button is clicked
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => RequestPage(journeyId: post['journeyId'],),
+                                          ),
+                                        );
+                                      },
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                      backgroundColor: const Color.fromARGB(255, 6, 30, 69),
+                                    ),
+                                    child: const Text(
+                                      'İstekler',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ElevatedButton(
                                   onPressed: () {
                                     _deletePost(index);
@@ -189,6 +212,7 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
       ),
     );
   }
+
 }
 
 

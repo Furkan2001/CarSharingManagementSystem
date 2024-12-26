@@ -1,26 +1,12 @@
 import 'package:flutter/material.dart';
-import 'vehicle_posts.dart';
+import '../widgets/custom_appbar.dart';
+import 'vehicle_posts.dart';  // Import the next screen where user will be navigated
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _idController = TextEditingController();
-
-  
-  void _handleLogin() {
-    String name = _nameController.text;
-    String id = _idController.text;
-    
-    
-    print('Ad/Soyad: $name, Öğrenci No: $id');
-
+  void _handleLogin(BuildContext context) {
+    // Navigate to the next screen (VehiclePostsScreen) when the button is pressed
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const VehiclePostsScreen()),
@@ -32,36 +18,20 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Giriş'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Ad/Soyad',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: _idController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Öğrenci No',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: _handleLogin,
-              child: const Text('Giriş'),
-            ),
-          ],
+      appBar: const CustomAppBar(title: 'Giriş'),
+      backgroundColor: const Color.fromARGB(255,54, 69, 74),   // Set background color for the entire page
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _handleLogin(context),
+          child: const Text(
+            'Gtü ile Giriş',
+            style: TextStyle(color: Colors.white),
+          ),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(200, 50),  // Button size
+            textStyle: const TextStyle(fontSize: 15),
+            backgroundColor: const Color.fromARGB(255, 6, 30, 69),
+          ),
         ),
       ),
     );
