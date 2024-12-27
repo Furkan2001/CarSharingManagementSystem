@@ -87,7 +87,7 @@ namespace CarSharingManagementSystem.Controllers
 
             try
             {
-                if (request == null || request.RequestId != id)
+                if (request == null)
                 {
                     return BadRequest("Invalid request data.");
                 }
