@@ -46,6 +46,7 @@ builder.Services.AddScoped<IJourneyDayRepository, JourneyDayRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMapRepository, MapRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
+builder.Services.AddScoped<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
 
 // Service Depencies
 builder.Services.AddScoped<IUserService, UserService>();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IJourneyService, JourneyService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddScoped<IUserDeviceTokenService, UserDeviceTokenService>();
 
 builder.Services.AddSingleton<IUserIdProvider, IntegerUserIdProvider>();
 
