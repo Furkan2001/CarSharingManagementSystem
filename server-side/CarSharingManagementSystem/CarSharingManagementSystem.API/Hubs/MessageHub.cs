@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using CarSharingManagementSystem.Business.Services.Interfaces;
-using CarSharingManagementSystem.Entities;
 using Microsoft.AspNetCore.SignalR;
 using FirebaseAdmin.Messaging;
 

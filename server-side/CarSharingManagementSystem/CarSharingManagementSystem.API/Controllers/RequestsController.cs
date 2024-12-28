@@ -98,6 +98,35 @@ namespace CarSharingManagementSystem.Controllers
                     return NotFound("Request not found.");
                 }
 
+                if (existingRequest.StatusId == 1 && request.StatusId == 2)
+                {
+                    request.Sender.SustainabilityPoint += 10;
+                    request.Receiver.SustainabilityPoint += 10;
+
+                    await _userService.UpdateAsync(request.Sender);
+                    await _userService.UpdateAsync(request.Receiver);
+                }
+                else if (existingRequest.StatusId == 2 && request.StatusId == 3)
+                {
+                    request.Sender.SustainabilityPoint -= 10;
+                    request.Receiver.SustainabilityPoint -= 10;
+
+                    await _userService.UpdateAsync(request.Sender);
+                    await _userService.UpdateAsync(request.Receiver);
+                }
+                else if (existingRequest.StatusId == 3 && request.StatusId == 2)
+                {
+                    request.Sender.SustainabilityPoint += 10;
+                    request.Receiver.SustainabilityPoint += 10;
+
+                    await _userService.UpdateAsync(request.Sender);
+                    await _userService.UpdateAsync(request.Receiver);
+                }
+
+                // - Sender request attıysa ve sonrada daha hiç request e cevap gelmeden silerse request herkesten silinmelidir.
+                if (existingRequest.SenderIsDeleted == false && request.SenderIsDeleted == true && existingRequest.StatusId == 1)
+                    await _requestService.DeleteAsync(id);
+
                 existingRequest.JourneyId = request.JourneyId;
                 existingRequest.SenderId = request.SenderId;
                 existingRequest.ReceiverId = request.ReceiverId;
