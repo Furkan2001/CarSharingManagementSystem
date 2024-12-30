@@ -19,7 +19,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final SignalRService _signalRService = SignalRService(); // Create an instance
   final TextEditingController _messageController = TextEditingController();
   final List<dynamic> _messages = [];
-  int userId = 2;
+  int userId = 1;
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _initializeSignalR() async {
     try {
-      await _signalRService.startConnection(userId.toString(), 'apikey121');
+      await _signalRService.startConnection(userId.toString(), 'api12324');
 
       _signalRService.onReceiveMessage((senderId, messageText) {
         if (senderId == widget.receiverId) {

@@ -6,14 +6,12 @@ class SignalRService {
 
   Future<void> startConnection(String userId, String apiKey) async {
     // Base URL for the SignalR hub
-    final url = 'http://localhost:3000/messageHub';
+    final url = 'http://localhost:3000/messageHub?user_id=$userId';
 
-    final defaultHeaders = MessageHeaders();
-    defaultHeaders.setHeaderValue("user_id", userId);
-    defaultHeaders.setHeaderValue("x-api-key", apiKey);
-
-    final httpConnectionOptions =
-        new HttpConnectionOptions(headers: defaultHeaders);
+    final httpConnectionOptions = HttpConnectionOptions(
+      transport: HttpTransportType.WebSockets, // Transport türünü WebSocket olarak belirleyin
+      skipNegotiation: true, // Negotiate aşamasını atla (eğer sunucu bunu gerektiriyorsa)
+    );
 
     // Build the connection with a custom HTTP client
     hubConnection = HubConnectionBuilder()
@@ -22,6 +20,14 @@ class SignalRService {
           options: httpConnectionOptions,
         )
         .build();
+
+    hubConnection.onclose(({Exception? error}) {
+      if (error != null) {
+        print("[ERROR] Bağlantı kapandı. Hata: ${error.toString()}");
+      } else {
+        print("[INFO] Bağlantı kapandı.");
+      }
+    });
 
     try {
       await hubConnection.start();

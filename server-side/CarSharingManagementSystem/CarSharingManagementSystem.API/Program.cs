@@ -58,8 +58,6 @@ builder.Services.AddScoped<IJourneyService, JourneyService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IUserDeviceTokenService, UserDeviceTokenService>();
 
-builder.Services.AddSingleton<IUserIdProvider, IntegerUserIdProvider>();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -127,6 +125,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSignalR();
+//builder.WebHost.UseUrls("http://0.0.0.0:3000");
 
 var app = builder.Build();
 
@@ -149,5 +148,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<MessageHub>("/messageHub");
+
+//app.Urls.Add("http://0.0.0.0:3000");
 
 app.Run();

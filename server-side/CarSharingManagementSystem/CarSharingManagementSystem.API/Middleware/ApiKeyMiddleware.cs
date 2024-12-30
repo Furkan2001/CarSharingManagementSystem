@@ -17,13 +17,7 @@ namespace CarSharingManagementSystem.API.Middleware
 
         public async Task InvokeAsync(HttpContext context, IUserService userService)
         {
-            if (context.Request.Path.StartsWithSegments("/swagger"))
-            {
-                await _next(context);
-                return;
-            }
-
-            if (context.Request.Path.StartsWithSegments("/auth"))
+            if (context.Request.Path.StartsWithSegments("/swagger") || context.Request.Path.StartsWithSegments("/auth") || context.Request.Path.StartsWithSegments("/messageHub"))
             {
                 await _next(context);
                 return;

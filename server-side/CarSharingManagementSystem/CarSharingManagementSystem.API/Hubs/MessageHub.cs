@@ -19,7 +19,8 @@ namespace CarSharingManagementSystem.API.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.GetHttpContext()?.Request.Headers["user_id"].ToString();
+            var httpContext = Context.GetHttpContext();
+            var userId = httpContext?.Request.Query["user_id"];
             if (!string.IsNullOrEmpty(userId))
             {
                 UserConnections[userId] = Context.ConnectionId;
@@ -30,7 +31,8 @@ namespace CarSharingManagementSystem.API.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = Context.GetHttpContext()?.Request.Headers["user_id"].ToString();
+            var httpContext = Context.GetHttpContext();
+            var userId = httpContext?.Request.Query["user_id"];
             if (!string.IsNullOrEmpty(userId) && UserConnections.ContainsKey(userId))
             {
                 UserConnections.TryRemove(userId, out _);
