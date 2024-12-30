@@ -48,7 +48,7 @@ class _PostScreenState extends State<PostScreen> {
 
   // This method will check if there's an existing request by the current user
   void _checkExistingRequest() {
-    int currentUserId = 2; // Implement this to fetch current user ID
+    int currentUserId = 1; // Implement this to fetch current user ID
     var existingRequest = _journey?['requests']?.firstWhere(
         (req) => req['senderId'] == currentUserId,
         orElse: () => null);
@@ -67,7 +67,7 @@ class _PostScreenState extends State<PostScreen> {
           0, // Typically 0 for new requests if your backend handles ID assignment
       "journeyId": widget.journeyId,
       "senderId":
-          2, // Again, implement getCurrentUserId to fetch this dynamically
+          1, // Again, implement getCurrentUserId to fetch this dynamically
       "receiverId": _journey?['userId'],
       "time":
           DateTime.now().toIso8601String(), // Current time as the request time

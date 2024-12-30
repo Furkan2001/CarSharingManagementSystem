@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_appbar.dart';
 import '../services/messages_service.dart'; // Import the MessageService
+import '../services/signal_r_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String postOwnerName;
@@ -15,64 +16,75 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final SignalRService _signalRService = SignalRService(); // Create an instance
   final TextEditingController _messageController = TextEditingController();
   final List<dynamic> _messages = [];
-  int userId =
-      1; // Assuming the current user's ID is 2. You can replace this with dynamic user ID if needed.
+  int userId = 2;
 
   @override
   void initState() {
     super.initState();
-    _loadMessageHistory(); // Load message history between current user and receiver
+    _initializeSignalR();
+    _loadMessageHistory();
+  }
+
+  Future<void> _initializeSignalR() async {
+    try {
+      await _signalRService.startConnection(userId.toString(), 'apikey121');
+
+      _signalRService.onReceiveMessage((senderId, messageText) {
+        if (senderId == widget.receiverId) {
+          print("Chat message");
+          setState(() {
+            _messages.add({
+              'senderId': senderId,
+              'receiverId': userId,
+              'messageText': messageText,
+            });
+          });
+        }
+      });
+    } catch (e) {
+      print("SignalR initialization failed: $e");
+    }
   }
 
   Future<void> _loadMessageHistory() async {
     try {
-      ;
-
-      // Load messages from the server
       var messageHistory =
           await MessageService.getMessageHistory(userId, widget.receiverId);
 
-      // Combine the messages from the local database and the server
-
-      // Remove duplicates based on 'messageId' and sort by 'time'
-      // var uniqueMessages = {};
-      // for (var message in allMessages) {
-      //   uniqueMessages[message['messageId']] = message;  // Use messageId as the key to ensure uniqueness
-      // }
-
-      // Sort messages by time (ascending order)
-      //sortedMessages.sort((a, b) => DateTime.parse(a['time']).compareTo(DateTime.parse(b['time'])));
-
       setState(() {
-        _messages.clear(); // Clear existing messages
-        _messages.addAll(
-            messageHistory); // Add the sorted, unique messages to the list
+        _messages.clear();
+        _messages.addAll(messageHistory);
       });
     } catch (e) {
       print('Error loading message history: $e');
     }
   }
 
-  // Send a message
-  void _sendMessage() async {
+  // Send a message using SignalR
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isNotEmpty) {
       final messageText = _messageController.text.trim();
 
-      // Send the message via the MessageService
-      bool success = await MessageService.sendMessage(
-          userId, widget.receiverId, messageText);
+      try {
+        // Send message via SignalR
+        await _signalRService.sendMessage(
+            userId, widget.receiverId, messageText);
 
-      if (success) {
+        // Update the chat UI
         setState(() {
-          // Add the sent message to the local message list
-          _messages.add({'sender': userId, 'message': messageText});
+          _messages.add({
+            'senderId': userId,
+            'receiverId': widget.receiverId,
+            'messageText': messageText,
+          });
         });
+
         _messageController.clear(); // Clear the message input field
-      } else {
-        // Show an error message if sending fails
-        print('Failed to send message');
+      } catch (e) {
+        print('Failed to send message: $e');
       }
     }
   }
@@ -80,6 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _signalRService.stopConnection(); // Call the instance method
     super.dispose();
   }
 
@@ -88,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: CustomAppBar(title: '${widget.postOwnerName} ile Mesajlaşma'),
       body: Container(
-        color: const Color(0xFF363C3E), // Background color for the chat screen
+        color: const Color(0xFF363C3E),
         child: Column(
           children: [
             Expanded(
@@ -106,8 +119,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         color: isSender
-                            ? const Color(0xFF4CAF50) // Green for sender
-                            : const Color(0xFF2196F3), // Blue for receiver
+                            ? const Color(0xFF4CAF50)
+                            : const Color(0xFF2196F3),
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(12.0),
                           topRight: const Radius.circular(12.0),

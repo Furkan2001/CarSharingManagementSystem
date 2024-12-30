@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'edit_post_screen.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
-import 'package:intl/date_symbol_data_local.dart'; 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../services/posts_service.dart';
 import 'request_screen.dart'; // Ensure this is properly imported
@@ -69,150 +69,213 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
       appBar: const CustomAppBar(title: 'Paylaşımlarım'),
       drawer: const Menu(),
       body: Container(
-      color: const Color.fromARGB(255,54, 69, 74),
-          child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _yourPosts.isEmpty
-              ? const Center(child: Text('Henüz bir paylaşım oluşturmadınız.'),)
-              : ListView.builder(
-                  itemCount: _yourPosts.length,
-                  itemBuilder: (context, index) {
+        color: const Color.fromARGB(255, 54, 69, 74),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _yourPosts.isEmpty
+                ? const Center(
+                    child: Text('Henüz bir paylaşım oluşturmadınız.'),
+                  )
+                : ListView.builder(
+                    itemCount: _yourPosts.length,
+                    itemBuilder: (context, index) {
+                      final post = _yourPosts[index];
 
-                    final post = _yourPosts[index];
+                      final currentDistrict =
+                          post['map']?['currentDistrict'] ?? 'Unknown';
+                      final destinationDistrict =
+                          post['map']?['destinationDistrict'] ?? 'Unknown';
 
-                    final currentDistrict = post['map']?['currentDistrict'] ?? 'Unknown';
-                    final destinationDistrict = post['map']?['destinationDistrict'] ?? 'Unknown';
+                      final timeString = post['time'] ?? 'N/A';
 
-                    final timeString = post['time'] ?? 'N/A';
+                      String formattedTime;
+                      if (timeString != 'N/A') {
+                        final DateTime dateTime = DateTime.parse(timeString);
+                        final DateFormat formatter =
+                            DateFormat('dd MMMM yyyy HH:mm', 'tr');
+                        formattedTime = formatter.format(dateTime);
+                      } else {
+                        formattedTime = 'N/A';
+                      }
 
-                    String formattedTime;
-                    if (timeString != 'N/A') {
-                      final DateTime dateTime = DateTime.parse(timeString);
-                      final DateFormat formatter = DateFormat('dd MMMM yyyy HH:mm', 'tr');
-                      formattedTime = formatter.format(dateTime);
-                    } else {
-                      formattedTime = 'N/A';
-                    }
-
-                    return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: Card(
-                      elevation: 4,
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: Card(
+                          elevation: 4,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.location_on, color: Color.fromARGB(255, 6, 30, 69), size: 30),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    '$currentDistrict → $destinationDistrict',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time, color: Color.fromARGB(255, 6, 30, 69), size: 24),
-                                const SizedBox(width: 8),
-                                Text(
-                                  formattedTime,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => EditPostScreen(journeyId: post['journeyId'],),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on,
+                                        color: Color.fromARGB(255, 6, 30, 69),
+                                        size: 30),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                const TextSpan(
+                                                  text: 'Başlangıç: ',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: currentDistrict,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                const TextSpan(
+                                                  text: 'Hedef: ',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: destinationDistrict,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                    backgroundColor: const Color.fromARGB(255, 6, 30, 69),
-                                  ),
-                                  child: const Text(
-                                    'Düzenle',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  ],
                                 ),
-                                 ElevatedButton(
-                                    onPressed: () {
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time,
+                                        color: Color.fromARGB(255, 6, 30, 69),
+                                        size: 24),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      formattedTime,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditPostScreen(
+                                              journeyId: post['journeyId'],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 6, 30, 69),
+                                      ),
+                                      child: const Text(
+                                        'Düzenle',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
                                         // Navigate to the new RequestPage when button is clicked
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => RequestPage(journeyId: post['journeyId'],),
+                                            builder: (context) => RequestPage(
+                                              journeyId: post['journeyId'],
+                                            ),
                                           ),
                                         );
                                       },
-                                    style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 6, 30, 69),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                      backgroundColor: const Color.fromARGB(255, 6, 30, 69),
+                                      child: const Text(
+                                        'İstekler',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                     ),
-                                    child: const Text(
-                                      'İstekler',
-                                      style: TextStyle(color: Colors.white),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _deletePost(index);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10),
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                      child: const Text(
+                                        'Sil',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                     ),
-                                  ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _deletePost(index);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                    backgroundColor: Colors.redAccent,
-                                  ),
-                                  child: const Text(
-                                    'Sil',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                );
-          },
-        ),
+                      );
+                    },
+                  ),
       ),
     );
   }
-
 }
-
-

@@ -17,21 +17,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vehicle Sharing App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigoAccent.shade700),
-        useMaterial3: true,
-      ),
-      initialRoute: '/login',
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/posts': (context) => const VehiclePostsScreen(),
-        '/requests': (context) => const VehicleRequestsScreen(),
-        '/create_post': (context) => const CreatePostScreen(),
-        '/your_posts': (context) => const YourPostsScreen(),
-        '/messages': (context) => MessagesScreen(),
-        '/my_requests': (context) => const MyRequestsScreen(userId: 2,),
-      }
-    );
+        title: 'Vehicle Sharing App',
+        theme: ThemeData(
+          colorScheme:
+              ColorScheme.fromSeed(seedColor: Colors.indigoAccent.shade700),
+          useMaterial3: true,
+        ),
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/posts': (context) => const VehiclePostsScreen(),
+          '/requests': (context) => const VehicleRequestsScreen(),
+          '/create_post': (context) => const CreatePostScreen(),
+          '/your_posts': (context) => const YourPostsScreen(),
+          '/messages': (context) => MessagesScreen(),
+          '/my_requests': (context) => const MyRequestsScreen(
+                userId: 1,
+              ),
+        });
   }
 }

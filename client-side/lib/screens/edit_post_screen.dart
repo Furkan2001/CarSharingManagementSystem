@@ -58,11 +58,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
       setState(() {
         _currentDistrict.text = journey['map']?['currentDistrict'] ?? '';
-        _destinationDistrict.text = journey['map']?['destinationDistrict'] ?? '';
+        _destinationDistrict.text =
+            journey['map']?['destinationDistrict'] ?? '';
         _selectedTime = DateTime.parse(journey['time']);
         _hasVehicle = journey['hasVehicle'];
         _isOneTime = journey['isOneTime'];
-        _mapId =  journey['mapId'];
+        _mapId = journey['mapId'];
 
         // Populate selected days based on journeyDays
         journey['journeyDays'].forEach((day) {
@@ -93,7 +94,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
         "mapId": _mapId,
         "time": _selectedTime?.toIso8601String(),
         "isOneTime": _isOneTime,
-        "userId": 2,
+        "userId": 1,
         "map": {
           "mapId": _mapId,
           "destinationLatitude": "41.008",
@@ -117,7 +118,8 @@ class _EditPostScreenState extends State<EditPostScreen> {
       };
 
       try {
-        final success = await PostsService.updateJourney(widget.journeyId, updatedJourney);
+        final success =
+            await PostsService.updateJourney(widget.journeyId, updatedJourney);
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Paylaşım başarıyla güncellendi!')),
@@ -178,7 +180,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
     }
   }
 
-
   Future<void> _launchMap() async {
     final Uri url = Uri.parse('https://www.google.com/maps');
     if (await canLaunchUrl(url)) {
@@ -189,32 +190,32 @@ class _EditPostScreenState extends State<EditPostScreen> {
   }
 
   Future<void> _selectDateTime(BuildContext context) async {
-  final DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: _selectedTime ?? DateTime.now(),
-    firstDate: DateTime.now(),
-    lastDate: DateTime(2101),
-  );
-
-  if (pickedDate != null) {
-    final TimeOfDay? pickedTime = await showTimePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedTime ?? DateTime.now()),
+      initialDate: _selectedTime ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
     );
 
-    if (pickedTime != null) {
-      setState(() {
-        _selectedTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-      });
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedTime ?? DateTime.now()),
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          _selectedTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +240,8 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     children: [
                       Expanded(child: _buildCoordinateField(_currentDistrict)),
                       IconButton(
-                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        icon: const Icon(Icons.add_location_alt,
+                            color: Colors.white),
                         onPressed: () {
                           _launchMap();
                         },
@@ -251,9 +253,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   label: 'Varış Yeri',
                   child: Row(
                     children: [
-                      Expanded(child: _buildCoordinateField(_destinationDistrict)),
+                      Expanded(
+                          child: _buildCoordinateField(_destinationDistrict)),
                       IconButton(
-                        icon: const Icon(Icons.add_location_alt, color: Colors.white),
+                        icon: const Icon(Icons.add_location_alt,
+                            color: Colors.white),
                         onPressed: () {
                           _launchMap();
                         },
@@ -262,22 +266,25 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   ),
                 ),
                 Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: ListTile(
-                      tileColor: const Color(0xFF2E3B4E), // Optional background color for consistency
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      title: Text(
-                        _selectedTime != null
-                            ? DateFormat('dd MMMM yyyy HH:mm', 'tr').format(_selectedTime!)
-                            : 'Kalkış Saati Seç',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      trailing: const Icon(Icons.access_time, color: Colors.white),
-                      onTap: () => _selectDateTime(context),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: ListTile(
+                    tileColor: const Color(
+                        0xFF2E3B4E), // Optional background color for consistency
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    title: Text(
+                      _selectedTime != null
+                          ? DateFormat('dd MMMM yyyy HH:mm', 'tr')
+                              .format(_selectedTime!)
+                          : 'Kalkış Saati Seç',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing:
+                        const Icon(Icons.access_time, color: Colors.white),
+                    onTap: () => _selectDateTime(context),
                   ),
+                ),
                 const SizedBox(height: 16),
                 _buildFormSwitch(
                   label: 'Aracınız var mı?',
@@ -290,33 +297,36 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   onChanged: (value) => setState(() => _isOneTime = value),
                 ),
                 if (!_isOneTime)
-                 _buildFormSection(
-                      label: 'Günler',
-                      child: Column(
-                        children: _selectedDays.keys.map((day) {
-                          return CheckboxListTile(
-                            title: Text(
-                              day,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            value: _selectedDays[day],
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _selectedDays[day] = value ?? false;
-                              });
-                            },
-                            checkColor: Colors.white, // Color for the check inside the box
-                            activeColor: const Color.fromARGB(255, 6, 30, 69), // Color when checked
-                            tileColor: const Color(0xFF2E3B4E), // Background color for the tile
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            side: const BorderSide(color: Colors.white), // Makes unchecked box white
-                          );
-                        }).toList(),
-                      ),
+                  _buildFormSection(
+                    label: 'Günler',
+                    child: Column(
+                      children: _selectedDays.keys.map((day) {
+                        return CheckboxListTile(
+                          title: Text(
+                            day,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          value: _selectedDays[day],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _selectedDays[day] = value ?? false;
+                            });
+                          },
+                          checkColor: Colors
+                              .white, // Color for the check inside the box
+                          activeColor: const Color.fromARGB(
+                              255, 6, 30, 69), // Color when checked
+                          tileColor: const Color(
+                              0xFF2E3B4E), // Background color for the tile
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          side: const BorderSide(
+                              color: Colors.white), // Makes unchecked box white
+                        );
+                      }).toList(),
                     ),
-
+                  ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _submitForm,
@@ -337,7 +347,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-Widget _buildCoordinateField(TextEditingController controller) {
+  Widget _buildCoordinateField(TextEditingController controller) {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(
@@ -390,5 +400,3 @@ Widget _buildCoordinateField(TextEditingController controller) {
     );
   }
 }
-
-
