@@ -708,3 +708,7 @@ C:/Users/user/Desktop/herseyim/Project/CarSharingManagementSystem/server-side/Ca
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/bin/Debug/net8.0/System.CodeDom.dll
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/bin/Debug/net8.0/System.Management.dll
 /Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/bin/Debug/net8.0/runtimes/win/lib/net7.0/System.Management.dll
+/Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/bin/Debug/net8.0/CarSharingManagementSystem.API.staticwebassets.endpoints.json
+/Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/obj/Debug/net8.0/staticwebassets.build.endpoints.json
+/Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/obj/Debug/net8.0/staticwebassets/msbuild.CarSharingManagementSystem.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+/Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.API/bin/Debug/net8.0/AspNetCoreRateLimit.dll

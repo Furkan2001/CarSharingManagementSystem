@@ -10,9 +10,21 @@ using CarSharingManagementSystem.API.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using AspNetCoreRateLimit;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// MemoryCache'i etkinleştirin
+builder.Services.AddMemoryCache();
+
+// IpRateLimiting yapılandırmasını ekleyin
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+
+// Rate Limit yapılandırması için gerekli servisleri ekleyin
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddInMemoryRateLimiting();
 
 // Add session services
 builder.Services.AddDistributedMemoryCache();  // Add in-memory caching for session
@@ -142,6 +154,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseIpRateLimiting();
 
 app.UseAuthentication();
 app.UseAuthorization();
