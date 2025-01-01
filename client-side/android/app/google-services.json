@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "469644077839",
+    "project_id": "project-1-a1896",
+    "storage_bucket": "project-1-a1896.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:469644077839:android:50893f245e1cdc8903ec7a",
+        "android_client_info": {
+          "package_name": "com.carsharing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9BihNp1xfmvcMw9jJrt0t0nGXTocyhR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -16,31 +16,35 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final SignalRService _signalRService = SignalRService(); // Create an instance
+  final SignalRService _signalRService = SignalRService();
   final TextEditingController _messageController = TextEditingController();
   final List<dynamic> _messages = [];
-  int userId = 1;
+  int userId = 2;
 
   @override
   void initState() {
     super.initState();
     _initializeSignalR();
-    _loadMessageHistory();
+    _loadMessages();
   }
 
   Future<void> _initializeSignalR() async {
     try {
-      await _signalRService.startConnection(userId.toString(), 'api12324');
+      await _signalRService.startConnection(userId.toString(), 'apikey121');
 
-      _signalRService.onReceiveMessage((senderId, messageText) {
+      _signalRService.onReceiveMessage((senderId, messageText) async {
         if (senderId == widget.receiverId) {
-          print("Chat message");
+          final timestamp = DateTime.now().toIso8601String();
+          final newMessage = {
+            'senderId': senderId,
+            'receiverId': userId,
+            'messageText': messageText,
+            'timestamp': timestamp,
+          };
+
+          // Update the UI
           setState(() {
-            _messages.add({
-              'senderId': senderId,
-              'receiverId': userId,
-              'messageText': messageText,
-            });
+            _messages.add(newMessage);
           });
         }
       });
@@ -49,37 +53,43 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<void> _loadMessageHistory() async {
+  /// Load messages from local database and server
+  Future<void> _loadMessages() async {
     try {
-      var messageHistory =
+      // Fetch server messages
+      final serverMessages =
           await MessageService.getMessageHistory(userId, widget.receiverId);
 
       setState(() {
         _messages.clear();
-        _messages.addAll(messageHistory);
+        _messages.addAll(serverMessages);
       });
     } catch (e) {
-      print('Error loading message history: $e');
+      print('Error loading messages: $e');
     }
   }
 
-  // Send a message using SignalR
+  /// Send a message using SignalR
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isNotEmpty) {
       final messageText = _messageController.text.trim();
+      final timestamp = DateTime.now().toIso8601String();
 
       try {
         // Send message via SignalR
         await _signalRService.sendMessage(
             userId, widget.receiverId, messageText);
 
+        final newMessage = {
+          'senderId': userId,
+          'receiverId': widget.receiverId,
+          'messageText': messageText,
+          'timestamp': timestamp,
+        };
+
         // Update the chat UI
         setState(() {
-          _messages.add({
-            'senderId': userId,
-            'receiverId': widget.receiverId,
-            'messageText': messageText,
-          });
+          _messages.add(newMessage);
         });
 
         _messageController.clear(); // Clear the message input field
@@ -92,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
-    _signalRService.stopConnection(); // Call the instance method
+    _signalRService.stopConnection();
     super.dispose();
   }
 
