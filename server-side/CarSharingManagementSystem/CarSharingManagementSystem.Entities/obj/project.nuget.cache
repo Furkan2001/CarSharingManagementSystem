@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "kJPXg4CU7o0=",
+  "dgSpecHash": "xyIWclBiTrY=",
   "success": true,
   "projectFilePath": "/Users/furkan/Desktop/CarSharing/CarSharingManagementSystem/server-side/CarSharingManagementSystem/CarSharingManagementSystem.Entities/CarSharingManagementSystem.Entities.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/furkan/.nuget/packages/microsoft.netcore.app.ref/8.0.11/microsoft.netcore.app.ref.8.0.11.nupkg.sha512",
+    "/Users/furkan/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.11/microsoft.aspnetcore.app.ref.8.0.11.nupkg.sha512"
+  ],
   "logs": []
 }

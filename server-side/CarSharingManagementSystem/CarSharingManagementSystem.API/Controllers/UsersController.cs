@@ -55,5 +55,12 @@ namespace CarSharingManagementSystem.Controllers
             await _userDeviceTokenService.AddDeviceTokenAsync(userId, deviceToken);
             return Ok(new { message = "Cihaz token'ı kaydedildi." });
         }
+
+        [HttpGet("get-user/{id}")]
+        public async Task<IActionResult> GetAUser(int id)
+        {
+            User? user = await _userService.GetByIdAsync(id);
+            return Ok(user);
+        }
     }
 }
