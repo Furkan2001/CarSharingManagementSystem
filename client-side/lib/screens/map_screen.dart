@@ -5,53 +5,73 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
+enum SelectionStep {
+  selectingOrigin,
+  originSelected,
+  selectingDestination,
+  routeFetched,
+}
+
 class MapScreen extends StatefulWidget {
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
+  SelectionStep _currentStep = SelectionStep.selectingOrigin;
+
   LatLng? _origin;
   LatLng? _destination;
   String? _originName;
   String? _destinationName;
-  final String _apiKey =
-      'AIzaSyCtTjLzchGpSEZHxTAgHVGBwQjwL4f9CVg'; // Replace with your actual API key
+  String? _encodedPolyline;
+
+  final String _apiKey = "AIzaSyCtTjLzchGpSEZHxTAgHVGBwQjwL4f9CVg";
 
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
 
-  bool _isSelectingOrigin = true; // Flag to determine which location to select
+  Completer<GoogleMapController> _mapController = Completer();
 
-  Completer<GoogleMapController> _mapController = Completer(); // Moved here
+  // To control the camera movement
+  CameraPosition _initialCameraPosition =
+      const CameraPosition(target: LatLng(40.8083, 29.3590), zoom: 10);
+
+  // Getter to retrieve the last selected location name
+  String? get _lastSelectedLocationName {
+    if (_currentStep == SelectionStep.routeFetched) {
+      return _destinationName;
+    } else if (_currentStep == SelectionStep.originSelected) {
+      return _originName;
+    }
+    return null;
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    if (!_mapController.isCompleted) {
+      _mapController.complete(controller);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Locations and Route'),
+        title: Text('Konum Seç'),
       ),
       body: Stack(
         children: [
           GoogleMap(
-            onMapCreated: _onMapCreated, // Ensure this is set
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(40.8083, 29.3590),
-              zoom: 10,
-            ),
-            onTap: (LatLng location) async {
-              if (_isSelectingOrigin) {
-                await _setOrigin(location);
-              } else {
-                await _setDestination(location);
-              }
-            },
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: _initialCameraPosition,
+            onTap: _handleMapTap,
             markers: _markers,
             polylines: _polylines,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
           ),
-          if (_origin != null || _destination != null)
+          // Positioned card to show the last selected location
+          if (_lastSelectedLocationName != null)
             Positioned(
               top: 10,
               left: 10,
@@ -64,91 +84,94 @@ class _MapScreenState extends State<MapScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (_origin != null)
-                        Text(
-                          'Origin: ${_originName ?? 'Fetching...'}',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      if (_destination != null)
-                        Text(
-                          'Destination: ${_destinationName ?? 'Fetching...'}',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: (_origin != null && _destination != null)
-                            ? _fetchRoute
-                            : null,
-                        child: Text('Show Route'),
+                      Text(
+                        _lastSelectedLocationName!,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
+          // Positioned button at the bottom for selection and confirmation
           Positioned(
             bottom: 16,
             left: 16,
             right: 16,
             child: ElevatedButton(
-              onPressed: (_origin != null && _destination != null)
-                  ? () {
-                      Navigator.pop(context, {
-                        'origin': {
-                          'coordinates': {
-                            'latitude': _origin!.latitude,
-                            'longitude': _origin!.longitude,
-                          },
-                          'name': _originName,
-                        },
-                        'destination': {
-                          'coordinates': {
-                            'latitude': _destination!.latitude,
-                            'longitude': _destination!.longitude,
-                          },
-                          'name': _destinationName,
-                        },
-                        'route': _polylines.isNotEmpty
-                            ? _polylines.first.points
-                                .map((point) => {
-                                      'latitude': point.latitude,
-                                      'longitude': point.longitude
-                                    })
-                                .toList()
-                            : [],
-                      });
-                    }
-                  : null,
-              child: const Text('Confirm Locations and Route'),
-            ),
-          ),
-          Positioned(
-            top: 80,
-            left: 16,
-            child: FloatingActionButton(
-              heroTag: 'toggleSelection',
-              onPressed: () {
-                setState(() {
-                  _isSelectingOrigin = !_isSelectingOrigin;
-                });
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(_isSelectingOrigin
-                      ? 'Select Origin'
-                      : 'Select Destination'),
-                  duration: Duration(seconds: 2),
-                ));
-              },
-              child:
-                  Icon(_isSelectingOrigin ? Icons.flag : Icons.flag_outlined),
-              tooltip:
-                  _isSelectingOrigin ? 'Select Origin' : 'Select Destination',
+              onPressed: _buttonAction,
+              child: Text(_buttonLabel()),
             ),
           ),
         ],
       ),
     );
+  }
+
+  // Determine the button label based on the current step
+  String _buttonLabel() {
+    switch (_currentStep) {
+      case SelectionStep.selectingOrigin:
+        return 'Başlangıç Seç';
+      case SelectionStep.originSelected:
+        return 'Başlangıç Onayla';
+      case SelectionStep.selectingDestination:
+        return 'Hedef Seç';
+      case SelectionStep.routeFetched:
+        return 'Konum ve Rota Onayla';
+      default:
+        return 'Seç';
+    }
+  }
+
+  // Handle button press based on the current step
+  void _buttonAction() async {
+    switch (_currentStep) {
+      case SelectionStep.selectingOrigin:
+        // Next step is to confirm origin after selecting
+        setState(() {
+          _currentStep = SelectionStep.originSelected;
+        });
+        break;
+      case SelectionStep.originSelected:
+        if (_origin != null) {
+          setState(() {
+            _currentStep = SelectionStep.selectingDestination;
+          });
+        } else {
+          // Handle error if origin is not selected
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Lütfen bir başlangıç noktası seçin.')),
+          );
+        }
+        break;
+      case SelectionStep.selectingDestination:
+        break;
+      case SelectionStep.routeFetched:
+        // Confirm and navigate back with data
+        _confirmSelections();
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Handle map taps based on the current step
+  Future<void> _handleMapTap(LatLng location) async {
+    switch (_currentStep) {
+      case SelectionStep.selectingOrigin:
+      case SelectionStep.originSelected:
+        await _setOrigin(location);
+        break;
+      case SelectionStep.selectingDestination:
+      case SelectionStep.routeFetched:
+        await _setDestination(location);
+        break;
+      default:
+        break;
+    }
   }
 
   Future<void> _setOrigin(LatLng location) async {
@@ -185,6 +208,11 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
     await _fetchLocationName(location, isOrigin: false);
+    // After setting destination, fetch the route automatically
+    await _fetchRoute();
+    setState(() {
+      _currentStep = SelectionStep.routeFetched;
+    });
   }
 
   Future<void> _fetchLocationName(LatLng location,
@@ -301,15 +329,21 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _addPolyline(String encodedPolyline) {
-    List<PointLatLng> points = PolylinePoints().decodePolyline(encodedPolyline);
-    List<LatLng> polylineCoordinates =
-        points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+    _encodedPolyline = encodedPolyline; // Store the encoded polyline
+
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodedPolyline =
+        polylinePoints.decodePolyline(encodedPolyline);
+
+    List<LatLng> polylineCoordinates = decodedPolyline
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
 
     setState(() {
       _polylines.clear();
       _polylines.add(
         Polyline(
-          polylineId: PolylineId('route'),
+          polylineId: const PolylineId('route'),
           points: polylineCoordinates,
           color: Colors.blue,
           width: 5,
@@ -317,7 +351,6 @@ class _MapScreenState extends State<MapScreen> {
       );
     });
 
-    // Optionally, adjust camera to fit the route
     _adjustCameraBounds(polylineCoordinates);
   }
 
@@ -345,11 +378,25 @@ class _MapScreenState extends State<MapScreen> {
     controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
-  // Initialize the map controller when the map is created
-  void _onMapCreated(GoogleMapController controller) {
-    if (!_mapController.isCompleted) {
-      _mapController.complete(controller);
-    }
+  // Confirm selections and navigate back with data
+  void _confirmSelections() {
+    Navigator.pop(context, {
+      'origin': {
+        'coordinates': {
+          'latitude': _origin!.latitude,
+          'longitude': _origin!.longitude,
+        },
+        'name': _originName,
+      },
+      'destination': {
+        'coordinates': {
+          'latitude': _destination!.latitude,
+          'longitude': _destination!.longitude,
+        },
+        'name': _destinationName,
+      },
+      'route': _encodedPolyline ?? '', // Send the encoded polyline string
+    });
   }
 
   @override

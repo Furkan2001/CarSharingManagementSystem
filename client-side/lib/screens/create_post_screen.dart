@@ -5,6 +5,8 @@ import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
 import 'map_screen.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({Key? key}) : super(key: key);
@@ -15,8 +17,8 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _currentDistrict = TextEditingController();
-  final TextEditingController _destinationDistrict = TextEditingController();
+  TextEditingController _currentDistrict = TextEditingController();
+  TextEditingController _destinationDistrict = TextEditingController();
   DateTime? _selectedTime;
   bool _hasVehicle = true;
   bool _isOneTime = true;
@@ -26,6 +28,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? _departureLongitude;
   String? _destinationLatitude;
   String? _destinationLongitude;
+
+  String? _encodedRoute; // To store the encoded route string
+  List<LatLng> _routePoints = []; // To store decoded route points for display
 
   final Map<String, bool> _selectedDays = {
     "Monday": false,
@@ -78,8 +83,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  Future<void> _launchMap(
-      TextEditingController controller, String field) async {
+  Future<void> _launchMap() async {
     final Map<String, dynamic>? result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MapScreen()),
@@ -87,24 +91,44 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     if (result != null) {
       setState(() {
-        final coordinates = result['coordinates'];
-        final latitude = coordinates['latitude'];
-        final longitude = coordinates['longitude'];
-        final locationName = result['locationName'];
-
-        // Update the controller with the location name
-        controller.text = locationName ?? 'Unknown location';
-
-        // Store latitude and longitude based on the field type
-        if (field == 'departure') {
-          _departureLatitude = latitude.toString();
-          _departureLongitude = longitude.toString();
-        } else if (field == 'destination') {
-          _destinationLatitude = latitude.toString();
-          _destinationLongitude = longitude.toString();
+        // Handle Origin
+        if (result['origin'] != null) {
+          final origin = result['origin'];
+          _currentDistrict.text = origin['name'] ?? 'Unknown location';
+          _departureLatitude = origin['coordinates']['latitude'].toString();
+          _departureLongitude = origin['coordinates']['longitude'].toString();
         }
 
-        print('Selected Coordinates: $latitude, $longitude');
+        // Handle Destination
+        if (result['destination'] != null) {
+          final destination = result['destination'];
+          _destinationDistrict.text = destination['name'] ?? 'Unknown location';
+          _destinationLatitude =
+              destination['coordinates']['latitude'].toString();
+          _destinationLongitude =
+              destination['coordinates']['longitude'].toString();
+        }
+
+        // Handle Route
+        if (result['route'] != null &&
+            result['route'] is String &&
+            (result['route'] as String).isNotEmpty) {
+          _encodedRoute = result['route'];
+
+          // Decode the polyline string to get the list of LatLng points
+          PolylinePoints polylinePoints = PolylinePoints();
+          List<PointLatLng> decodedPolyline =
+              polylinePoints.decodePolyline(_encodedRoute!);
+
+          _routePoints = decodedPolyline
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList();
+        }
+
+        print('Origin: $_departureLatitude, $_departureLongitude');
+        print('Destination: $_destinationLatitude, $_destinationLongitude');
+        print('Encoded Route: $_encodedRoute');
+        print('Decoded Route Points: $_routePoints');
       });
     }
   }
@@ -124,7 +148,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           "destinationLongitude": _destinationLongitude,
           "departureLatitude": _departureLatitude,
           "departureLongitude": _departureLongitude,
-          "mapRoute": "Route",
+          "mapRoute": _encodedRoute,
           "currentDistrict": _currentDistrict.text,
           "destinationDistrict": _destinationDistrict.text,
         },
@@ -217,13 +241,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   child: Row(
                     children: [
                       Expanded(child: _buildCoordinateField(_currentDistrict)),
-                      IconButton(
-                        icon: const Icon(Icons.add_location_alt,
-                            color: Colors.white),
-                        onPressed: () {
-                          _launchMap(_currentDistrict, 'departure');
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -233,15 +250,20 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     children: [
                       Expanded(
                           child: _buildCoordinateField(_destinationDistrict)),
-                      IconButton(
-                        icon: const Icon(Icons.add_location_alt,
-                            color: Colors.white),
-                        onPressed: () {
-                          _launchMap(_destinationDistrict, 'destination');
-                        },
-                      ),
                     ],
                   ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_location_alt,
+                          color: Colors.white),
+                      onPressed: () {
+                        _launchMap();
+                      },
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),

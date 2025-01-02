@@ -3,7 +3,7 @@ import 'package:signalr_netcore/signalr_client.dart';
 class SignalRService {
   late HubConnection hubConnection;
 
-  Future<void> startConnection(String userId, String apiKey) async {
+  Future<void> startConnection(String userId) async {
     // Base URL for the SignalR hub
     final url = 'http://localhost:3000/messageHub?user_id=$userId';
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:intl/date_symbol_data_local.dart'; // Initialize locale data
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart'; // For polyline decoding
 
 import '../services/posts_service.dart';
 import '../services/requests_service.dart';
@@ -43,12 +44,20 @@ class _PostScreenState extends State<PostScreen> {
       _checkExistingRequest();
     } catch (e) {
       print('Error fetching journey: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      // Optionally, show an error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Yolculuk bilgisi alınamadı: $e')),
+      );
     }
   }
 
   // This method will check if there's an existing request by the current user
   void _checkExistingRequest() {
-    int currentUserId = 1; // Implement this to fetch current user ID
+    int currentUserId =
+        1; // Implement this to fetch current user ID dynamically
     var existingRequest = _journey?['requests']?.firstWhere(
         (req) => req['senderId'] == currentUserId,
         orElse: () => null);
@@ -63,11 +72,9 @@ class _PostScreenState extends State<PostScreen> {
 
   Future<void> _createRequest() async {
     Map<String, dynamic> request = {
-      "requestId":
-          0, // Typically 0 for new requests if your backend handles ID assignment
+      "requestId": 0,
       "journeyId": widget.journeyId,
-      "senderId":
-          1, // Again, implement getCurrentUserId to fetch this dynamically
+      "senderId": 1,
       "receiverId": _journey?['userId'],
       "time":
           DateTime.now().toIso8601String(), // Current time as the request time
@@ -76,16 +83,24 @@ class _PostScreenState extends State<PostScreen> {
       "senderIsDeleted": false
     };
 
-    bool success = await RequestsService.createRequest(request);
-    if (success) {
-      // Show confirmation message or update UI
+    try {
+      bool success = await RequestsService.createRequest(request);
+      if (success) {
+        // Show confirmation message or update UI
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('İstek başarıyla gönderildi!')),
+        );
+        _fetchJourney(); // Refresh the journey to reflect the new request
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('İstek gönderilemedi!')),
+        );
+      }
+    } catch (e) {
+      print('Error creating request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Application successful!')),
-      );
-    } else {
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to apply!')),
+        const SnackBar(content: Text('Bir hata oluştu.')),
       );
     }
   }
@@ -140,6 +155,21 @@ class _PostScreenState extends State<PostScreen> {
             ? double.tryParse(_journey!['map']?['destinationLongitude'])
             : null;
 
+    // Extract the encoded route
+    final encodedRoute = _journey?['map']?['mapRoute'] ?? '';
+
+    // Decode the polyline into a list of LatLng
+    List<LatLng> polylineCoordinates = [];
+    if (encodedRoute.isNotEmpty) {
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> decodedPoints =
+          polylinePoints.decodePolyline(encodedRoute);
+
+      polylineCoordinates = decodedPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+    }
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -189,30 +219,42 @@ class _PostScreenState extends State<PostScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
+                    initialCameraPosition: _getInitialCameraPosition(
                         departureLatitude,
                         departureLongitude,
-                      ),
-                      zoom: 10, // Adjust zoom level
-                    ),
+                        destinationLatitude,
+                        destinationLongitude),
                     markers: {
                       Marker(
                         markerId: const MarkerId('departure'),
                         position: LatLng(departureLatitude, departureLongitude),
                         infoWindow: const InfoWindow(title: 'Başlangıç'),
+                        icon: BitmapDescriptor.defaultMarkerWithHue(
+                            BitmapDescriptor.hueGreen),
                       ),
                       Marker(
                         markerId: const MarkerId('destination'),
                         position:
                             LatLng(destinationLatitude, destinationLongitude),
                         infoWindow: const InfoWindow(title: 'Hedef'),
+                        icon: BitmapDescriptor.defaultMarkerWithHue(
+                            BitmapDescriptor.hueRed),
                       ),
                     },
+                    polylines: polylineCoordinates.isNotEmpty
+                        ? {
+                            Polyline(
+                              polylineId: const PolylineId('route'),
+                              points: polylineCoordinates,
+                              color: Colors.blue,
+                              width: 5,
+                            ),
+                          }
+                        : {},
                     zoomControlsEnabled: false,
                     mapType: MapType.normal,
                     onMapCreated: (GoogleMapController controller) {
-                      // Optional: Store controller if needed
+                      _adjustCameraBounds(polylineCoordinates, controller);
                     },
                   ),
                 ),
@@ -221,6 +263,45 @@ class _PostScreenState extends State<PostScreen> {
         ),
       ),
     );
+  }
+
+  // Determines the initial camera position based on origin and destination
+  CameraPosition _getInitialCameraPosition(double originLat, double originLng,
+      double destinationLat, double destinationLng) {
+    // Calculate the midpoint between origin and destination
+    double midLat = (originLat + destinationLat) / 2;
+    double midLng = (originLng + destinationLng) / 2;
+
+    return CameraPosition(
+      target: LatLng(midLat, midLng),
+      zoom: 10, // Adjust zoom level as needed
+    );
+  }
+
+  // Adjusts the camera to fit the entire polyline
+  Future<void> _adjustCameraBounds(
+      List<LatLng> polylineCoordinates, GoogleMapController controller) async {
+    if (polylineCoordinates.isEmpty) return;
+
+    double minLat = polylineCoordinates.first.latitude;
+    double maxLat = polylineCoordinates.first.latitude;
+    double minLng = polylineCoordinates.first.longitude;
+    double maxLng = polylineCoordinates.first.longitude;
+
+    for (var coord in polylineCoordinates) {
+      if (coord.latitude < minLat) minLat = coord.latitude;
+      if (coord.latitude > maxLat) maxLat = coord.latitude;
+      if (coord.longitude < minLng) minLng = coord.longitude;
+      if (coord.longitude > maxLng) maxLng = coord.longitude;
+    }
+
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+
+    // Animate the camera to fit the bounds with padding
+    controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
