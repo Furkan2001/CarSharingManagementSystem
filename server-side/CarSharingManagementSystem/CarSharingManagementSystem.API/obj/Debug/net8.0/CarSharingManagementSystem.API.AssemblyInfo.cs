@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CarSharingManagementSystem.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b5df30dacd58c9682268bcddc10a907b58915bc6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b167db2f5dbb9c59210ede10c398e1209d537e9d")]
 [assembly: System.Reflection.AssemblyProductAttribute("CarSharingManagementSystem.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CarSharingManagementSystem.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
