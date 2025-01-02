@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
+import 'map_screen.dart';
 
 class EditPostScreen extends StatefulWidget {
   final int journeyId;
@@ -18,8 +21,8 @@ class EditPostScreen extends StatefulWidget {
 
 class _EditPostScreenState extends State<EditPostScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _currentDistrict = TextEditingController();
-  final TextEditingController _destinationDistrict = TextEditingController();
+  TextEditingController _currentDistrict = TextEditingController();
+  TextEditingController _destinationDistrict = TextEditingController();
   DateTime? _selectedTime;
   bool _hasVehicle = true;
   bool _isOneTime = true;
@@ -27,6 +30,14 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
   bool _isLocaleInitialized = false;
   bool _isLoading = true;
+
+  String? _departureLatitude;
+  String? _departureLongitude;
+  String? _destinationLatitude;
+  String? _destinationLongitude;
+
+  String? _encodedRoute; // To store the encoded route string
+  List<LatLng> _routePoints = []; // To store decoded route points for display
 
   final Map<String, bool> _selectedDays = {
     "Monday": false,
@@ -50,6 +61,56 @@ class _EditPostScreenState extends State<EditPostScreen> {
     setState(() {
       _isLocaleInitialized = true;
     });
+  }
+
+  Future<void> _launchMap() async {
+    final Map<String, dynamic>? result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    if (result != null) {
+      setState(() {
+        // Handle Origin
+        if (result['origin'] != null) {
+          final origin = result['origin'];
+          _currentDistrict.text = origin['name'] ?? 'Unknown location';
+          _departureLatitude = origin['coordinates']['latitude'].toString();
+          _departureLongitude = origin['coordinates']['longitude'].toString();
+        }
+
+        // Handle Destination
+        if (result['destination'] != null) {
+          final destination = result['destination'];
+          _destinationDistrict.text = destination['name'] ?? 'Unknown location';
+          _destinationLatitude =
+              destination['coordinates']['latitude'].toString();
+          _destinationLongitude =
+              destination['coordinates']['longitude'].toString();
+        }
+
+        // Handle Route
+        if (result['route'] != null &&
+            result['route'] is String &&
+            (result['route'] as String).isNotEmpty) {
+          _encodedRoute = result['route'];
+
+          // Decode the polyline string to get the list of LatLng points
+          PolylinePoints polylinePoints = PolylinePoints();
+          List<PointLatLng> decodedPolyline =
+              polylinePoints.decodePolyline(_encodedRoute!);
+
+          _routePoints = decodedPolyline
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList();
+        }
+
+        print('Origin: $_departureLatitude, $_departureLongitude');
+        print('Destination: $_destinationLatitude, $_destinationLongitude');
+        print('Encoded Route: $_encodedRoute');
+        print('Decoded Route Points: $_routePoints');
+      });
+    }
   }
 
   Future<void> _fetchJourneyData() async {
@@ -96,12 +157,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
         "isOneTime": _isOneTime,
         "userId": 1,
         "map": {
-          "mapId": _mapId,
-          "destinationLatitude": "41.008",
-          "destinationLongitude": "29.345",
-          "departureLatitude": "40.786",
-          "departureLongitude": "29.678",
-          "mapRoute": "Route",
+          "mapId": 0,
+          "destinationLatitude": _destinationLatitude,
+          "destinationLongitude": _destinationLongitude,
+          "departureLatitude": _departureLatitude,
+          "departureLongitude": _departureLongitude,
+          "mapRoute": _encodedRoute,
           "currentDistrict": _currentDistrict.text,
           "destinationDistrict": _destinationDistrict.text,
         },
@@ -180,15 +241,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
     }
   }
 
-  Future<void> _launchMap() async {
-    final Uri url = Uri.parse('https://www.google.com/maps');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -239,13 +291,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   child: Row(
                     children: [
                       Expanded(child: _buildCoordinateField(_currentDistrict)),
-                      IconButton(
-                        icon: const Icon(Icons.add_location_alt,
-                            color: Colors.white),
-                        onPressed: () {
-                          _launchMap();
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -255,15 +300,20 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     children: [
                       Expanded(
                           child: _buildCoordinateField(_destinationDistrict)),
-                      IconButton(
-                        icon: const Icon(Icons.add_location_alt,
-                            color: Colors.white),
-                        onPressed: () {
-                          _launchMap();
-                        },
-                      ),
                     ],
                   ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_location_alt,
+                          color: Colors.white),
+                      onPressed: () {
+                        _launchMap();
+                      },
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
