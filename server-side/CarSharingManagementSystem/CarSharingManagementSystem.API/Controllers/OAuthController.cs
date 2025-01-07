@@ -87,7 +87,7 @@ namespace CarSharingManagementSystem.Controllers
 
                     var jsonData = JsonConvert.SerializeObject(requestData);
                     var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
+                    //var content = new FormUrlEncodedContent(requestData);
                     var response = await httpClient.PostAsync(queryServerAddress, content);
 
                     if (!response.IsSuccessStatusCode)
