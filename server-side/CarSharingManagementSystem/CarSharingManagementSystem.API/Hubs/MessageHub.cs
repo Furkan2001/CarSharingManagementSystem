@@ -53,18 +53,18 @@ namespace CarSharingManagementSystem.API.Hubs
             }
             else
             {
-                Console.WriteLine($"Alıcı {receiverId} bağlı değil. Mesaj veritabanına kaydediliyor...");
-                await _messageService.AddAsync(new Entities.Message
-                {
-                    SenderId = senderId,
-                    ReceiverId = receiverId,
-                    MessageText = message,
-                    IsRead = false,
-                    Time = DateTime.UtcNow
-                });
-
+                Console.WriteLine($"Alıcı {receiverId} bağlı değil.");
                 await SendNotification(receiverId, "Yeni Mesaj", message);
             }
+
+            await _messageService.AddAsync(new Entities.Message
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                MessageText = message,
+                IsRead = false,
+                Time = DateTime.UtcNow
+            });
         }
 
         private async Task SendNotification(int receiverId, string title, string messageBody)

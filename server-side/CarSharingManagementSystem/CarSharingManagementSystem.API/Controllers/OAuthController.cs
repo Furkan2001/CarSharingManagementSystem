@@ -94,6 +94,7 @@ namespace CarSharingManagementSystem.Controllers
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"Error response: {errorContent}");
+                        Console.WriteLine($"Error code: {response.StatusCode}");
                         return StatusCode((int)response.StatusCode, $"Error fetching user info: {errorContent}");
                     }
 
