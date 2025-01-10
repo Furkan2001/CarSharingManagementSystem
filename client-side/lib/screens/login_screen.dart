@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_appbar.dart';
-import 'vehicle_posts.dart';  // Import the next screen where user will be navigated
+import 'vehicle_posts.dart'; // Import the next screen where user will be navigated
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   void _handleLogin(BuildContext context) {
-    // Navigate to the next screen (VehiclePostsScreen) when the button is pressed
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const VehiclePostsScreen()),
@@ -19,7 +18,8 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Giriş'),
-      backgroundColor: const Color.fromARGB(255,54, 69, 74),   // Set background color for the entire page
+      backgroundColor: const Color.fromARGB(
+          255, 54, 69, 74), // Set background color for the entire page
       body: Center(
         child: ElevatedButton(
           onPressed: () => _handleLogin(context),
@@ -28,7 +28,7 @@ class LoginScreen extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(
-            minimumSize: const Size(200, 50),  // Button size
+            minimumSize: const Size(200, 50), // Button size
             textStyle: const TextStyle(fontSize: 15),
             backgroundColor: const Color.fromARGB(255, 6, 30, 69),
           ),

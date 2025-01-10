@@ -47,7 +47,7 @@ class _MenuState extends State<Menu> {
 
   Future<void> _fetchUserData() async {
     final String apiUrl =
-        'http://localhost:3000/api/Users/get-user/$_userId'; // Adjusted for Android emulator
+        'http://10.0.2.2:3000/api/Users/get-user/$_userId'; // Adjusted for Android emulator
 
     try {
       final response = await http.get(

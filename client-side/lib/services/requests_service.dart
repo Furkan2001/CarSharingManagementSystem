@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class RequestsService {
   static const String _baseUrl =
-      'http://localhost:3000/api/requests'; // Adjust the base URL as necessary
+      'http://10.0.2.2:3000/api/requests'; // Adjust the base URL as necessary
   static const String _apiKey = 'api12324';
   static const String _userID = '1';
 

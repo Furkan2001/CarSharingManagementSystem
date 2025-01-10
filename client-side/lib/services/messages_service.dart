@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MessageService {
-  static const String _baseUrl = 'http://localhost:3000/api';
+  static const String _baseUrl = 'http://10.0.2.2:3000/api';
   static const String _apiKey = 'api12324';
   static const String _userID = '1';
 
