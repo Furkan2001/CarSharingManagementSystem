@@ -50,21 +50,30 @@ namespace CarSharingManagementSystem.API.Hubs
                 Console.WriteLine($"Alıcı {receiverId} bağlı. Mesaj iletiliyor... connectionId: {connectionId}");
                 await Clients.Client(connectionId).SendAsync("ReceiveMessage", senderId, message);
                 Console.WriteLine("Clients.Client.SendAsync çağrısı tamamlandı.");
+
+                await _messageService.AddAsync(new Entities.Message
+                {
+                    SenderId = senderId,
+                    ReceiverId = receiverId,
+                    MessageText = message,
+                    IsRead = true,
+                    Time = DateTime.UtcNow
+                });
             }
             else
             {
                 Console.WriteLine($"Alıcı {receiverId} bağlı değil.");
                 await SendNotification(receiverId, "Yeni Mesaj", message);
-            }
 
-            await _messageService.AddAsync(new Entities.Message
-            {
-                SenderId = senderId,
-                ReceiverId = receiverId,
-                MessageText = message,
-                IsRead = false,
-                Time = DateTime.UtcNow
-            });
+                await _messageService.AddAsync(new Entities.Message
+                {
+                    SenderId = senderId,
+                    ReceiverId = receiverId,
+                    MessageText = message,
+                    IsRead = false,
+                    Time = DateTime.UtcNow
+                });
+            }
         }
 
         private async Task SendNotification(int receiverId, string title, string messageBody)
