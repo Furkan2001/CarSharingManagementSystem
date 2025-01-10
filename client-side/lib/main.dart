@@ -6,8 +6,15 @@ import 'screens/create_post_screen.dart';
 import 'screens/your_posts_screen.dart';
 import 'screens/messages_screen.dart';
 import 'screens/my_requests.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/firebase_service.dart';
 
-void main() {
+final navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseApi().initNotifications();
   runApp(const MyApp());
 }
 
@@ -24,6 +31,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute: '/login',
+        navigatorKey: navigatorKey,
         routes: {
           '/login': (context) => const LoginScreen(),
           '/posts': (context) => const VehiclePostsScreen(),
