@@ -80,10 +80,10 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             return false;
         }
 
-        public async Task<IEnumerable<Message>> GetEndUnreadedMessagesForAPerson(int userId)
+        public async Task<IEnumerable<Message>> GetEndMessagesForAPerson(int userId)
         {
             var messages = await _context.Messages
-                .Where(m => (m.SenderId == userId || m.ReceiverId == userId) && !m.IsRead)
+                .Where(m => (m.SenderId == userId || m.ReceiverId == userId))
                 .Include(m => m.Sender)
                 .Include(m => m.Receiver)
                 .ToListAsync();

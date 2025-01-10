@@ -77,7 +77,7 @@ namespace CarSharingManagementSystem.Controllers
         [HttpGet("endmessages/{userId}")]
         public async Task<IActionResult> GetEndUnreadedMessagesForAPerson(int userId)
         {
-            var endMessagesForAPerson = await _messageService.GetEndUnreadedMessagesForAPerson(userId);
+            var endMessagesForAPerson = await _messageService.GetEndMessagesForAPerson(userId);
             if (endMessagesForAPerson == null)
                 return NotFound(new { Message = "Not Found" });
             
