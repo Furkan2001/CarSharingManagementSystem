@@ -34,7 +34,7 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
                     if (message.ReceiverId == userId1)
                         await MarkAsReadAsync(message.MessageId);
                 }
-                await DeleteReadMessagesAsync();
+                //await DeleteReadMessagesAsync();
             }
 
             return messages;
