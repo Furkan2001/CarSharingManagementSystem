@@ -60,10 +60,10 @@ namespace CarSharingManagementSystem.Business.Services.Implementations
             return await _messageRepository.GetEndUnreadedMessagesForAPerson(userId);
         }
 
-        public async Task<int> DeleteReadMessagesAsync()
+        /*public async Task<int> DeleteReadMessagesAsync()
         {
             return await _messageRepository.DeleteReadMessagesAsync();
-        }
+        }*/
 
         public async Task<int> DeleteMessagesBetweenTwoUsers(int userId1, int userId2)
         {

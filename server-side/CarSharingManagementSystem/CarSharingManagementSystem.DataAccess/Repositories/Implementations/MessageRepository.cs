@@ -98,7 +98,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             return groupedMessages;
         }
 
-        public async Task<int> DeleteReadMessagesAsync()
+        /*public async Task<int> DeleteReadMessagesAsync()
         {
             try
             {
@@ -114,7 +114,7 @@ namespace CarSharingManagementSystem.DataAccess.Repositories.Implementations
             {
                 return -1;
             }
-        }
+        }*/
 
         public async Task<int> DeleteMessagesBetweenTwoUsers(int userId1, int userId2)
         {
