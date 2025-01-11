@@ -40,13 +40,13 @@ class _EditPostScreenState extends State<EditPostScreen> {
   List<LatLng> _routePoints = []; // To store decoded route points for display
 
   final Map<String, bool> _selectedDays = {
-    "Monday": false,
-    "Tuesday": false,
-    "Wednesday": false,
-    "Thursday": false,
-    "Friday": false,
-    "Saturday": false,
-    "Sunday": false,
+    "Pazartesi": false,
+    "Salı": false,
+    "Çarşamba": false,
+    "Perşembe": false,
+    "Cuma": false,
+    "Cumartesi": false,
+    "Pazar": false,
   };
 
   @override
@@ -201,19 +201,19 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
   int _getDayId(String dayName) {
     switch (dayName) {
-      case "Monday":
+      case "Pazartesi":
         return 1;
-      case "Tuesday":
+      case "Salı":
         return 2;
-      case "Wednesday":
+      case "Çarşamba":
         return 3;
-      case "Thursday":
+      case "Perşembe":
         return 4;
-      case "Friday":
+      case "Cuma":
         return 5;
-      case "Saturday":
+      case "Cumartesi":
         return 6;
-      case "Sunday":
+      case "Pazar":
         return 7;
       default:
         return 0;
@@ -223,19 +223,19 @@ class _EditPostScreenState extends State<EditPostScreen> {
   String? _getDayName(int dayId) {
     switch (dayId) {
       case 1:
-        return "Monday";
+        return "Pazartesi";
       case 2:
-        return "Tuesday";
+        return "Salı";
       case 3:
-        return "Wednesday";
+        return "Çarşamba";
       case 4:
-        return "Thursday";
+        return "Perşembe";
       case 5:
-        return "Friday";
+        return "Cuma";
       case 6:
-        return "Saturday";
+        return "Cumartesi";
       case 7:
-        return "Sunday";
+        return "Pazar";
       default:
         return null;
     }

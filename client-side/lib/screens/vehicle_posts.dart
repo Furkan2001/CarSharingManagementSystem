@@ -6,6 +6,7 @@ import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
 import '../screens/post_screen.dart';
+import '../utils/journey_utils.dart';
 
 class VehiclePostsScreen extends StatefulWidget {
   const VehiclePostsScreen({Key? key}) : super(key: key);
@@ -99,17 +100,18 @@ class _VehiclePostsScreenState extends State<VehiclePostsScreen> {
                         final destinationDistrict =
                             journey['map']?['destinationDistrict'] ?? 'Unknown';
 
-                        final timeString = journey['time'] ?? 'N/A';
+                        // Compute dateToShow dynamically
+                        final DateTime dateToShow = journey['isOneTime']
+                            ? DateTime.parse(journey[
+                                'time']) // Use time for one-time journeys
+                            : JourneyUtils.calculateDateForRecurringJourney(
+                                journey); // Compute for recurring journeys
 
-                        String formattedTime;
-                        if (timeString != 'N/A') {
-                          final DateTime dateTime = DateTime.parse(timeString);
-                          final DateFormat formatter =
-                              DateFormat('dd MMMM yyyy HH:mm', 'tr');
-                          formattedTime = formatter.format(dateTime);
-                        } else {
-                          formattedTime = 'N/A';
-                        }
+                        // Format the computed date for display
+                        final DateFormat formatter =
+                            DateFormat('dd MMMM yyyy HH:mm', 'tr');
+                        final String formattedTime =
+                            formatter.format(dateToShow);
 
                         final id = journey['journeyId'] ?? -1;
 

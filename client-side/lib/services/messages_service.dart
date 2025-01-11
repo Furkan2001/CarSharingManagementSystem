@@ -81,17 +81,16 @@ class MessageService {
   }
 
   // Delete all read messages
-  static Future<bool> deleteReadMessages() async {
-    final response = await http.delete(
-      Uri.parse('$_baseUrl/Messages/delete-read'),
-      headers: _headers,
-    );
+  // static Future<bool> deleteReadMessages() async {
+  //   final response = await http.delete(
+  //     Uri.parse('$_baseUrl/Messages/delete-read'),
+  //     headers: _headers,
+  //   );
 
-    return response.statusCode == 200;
-  }
+  //   return response.statusCode == 200;
+  // }
 
-  static Future<List<dynamic>> getEndUnreadedMessagesForAPerson(
-      int userId) async {
+  static Future<List<dynamic>> getEndMessagesForAPerson(int userId) async {
     final response = await http.get(
       Uri.parse('$_baseUrl/Messages/endmessages/$userId'),
       headers: _headers,

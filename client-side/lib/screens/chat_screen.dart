@@ -53,7 +53,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  /// Load messages from local database and server
   Future<void> _loadMessages() async {
     try {
       // Fetch server messages
