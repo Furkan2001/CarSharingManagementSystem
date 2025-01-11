@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.Net.Http;
 using Newtonsoft.Json;
-using System.Collections.Generic;
+using CarSharingManagementSystem.Business.Services.Interfaces;
+using Newtonsoft.Json.Linq;
+using CarSharingManagementSystem.Entities;
+using CarSharingManagementSystem.HelperClasses;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -14,13 +13,18 @@ namespace CarSharingManagementSystem.Controllers
     [ApiController]
     public class OAuthController : ControllerBase
     {
+        private readonly IUserService _userService;
         private readonly string clientId = "FB387A2ABDDD423586FFB6ED157762BB";
         private readonly string clientSecret = "3FF64BC099174847A5FB2EF22E1D0930";
         private readonly string redirectUri = "http://localhost:3000/auth";
         private readonly string authorizationEndpoint = "https://kampus.gtu.edu.tr/oauth/yetki";
         private readonly string tokenEndpoint = "https://kampus.gtu.edu.tr/oauth/dogrulama";
-        private readonly string queryServerAddress = "https://kampus.gtu.edu.tr/oauth/sorgu";
+        private readonly string queryServerAddress = "https://kampus.gtu.edu.tr/oauth/sorgulama";
 
+        public OAuthController(IUserService userService)
+        {
+            _userService = userService;
+        }
 
         [HttpGet("login")]
         public IActionResult Login()
@@ -45,7 +49,7 @@ namespace CarSharingManagementSystem.Controllers
                                 $"&code_challenge_method=s256" +
                                 $"&code_challenge={codeChallenge}";
 
-            return Redirect(authorizationUrl);
+            return Ok(authorizationUrl);
         }
 
         [HttpGet("auth")]
@@ -99,10 +103,23 @@ namespace CarSharingManagementSystem.Controllers
                     }
 
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var userInfo = JsonConvert.DeserializeObject(responseContent);
+                    var userInfo = JToken.Parse(responseContent);
 
-                    // 3. Kullanıcı bilgilerini döndür
-                    return Ok(userInfo);
+                    if (userInfo == null)
+                    {
+                        return BadRequest("User info could not be parsed.");
+                    }
+
+                    User? newUser = await ControlUser(userInfo);
+
+                    if (newUser == null)
+                    {
+                        Console.WriteLine("Error ControlUser funciton");
+                        return BadRequest();
+                    }
+
+                    Console.WriteLine("User exists in the system.");
+                    return Ok(newUser);
                 }
             }
             catch (Exception ex)
@@ -111,6 +128,48 @@ namespace CarSharingManagementSystem.Controllers
             }
         }
 
+        private async Task<User?> ControlUser(JToken userInfo)
+        {
+            User _user = ConvertToUser(userInfo);
+
+            var users = await _userService.GetAllAsync();
+
+            foreach(User user in users)
+            {
+                if (user.Email == _user.Email)
+                    return await _userService.GetUserByEmailAsync(_user.Email);
+            }
+
+            _user.apiKey = ApiKeyGenerator.GenerateApiKey();
+            _user.SustainabilityPoint = 0;
+            await _userService.AddAsync(_user);
+
+            var tempUser = await _userService.GetUserByEmailAsync(_user.Email);
+
+            if (tempUser != null)
+                return tempUser;
+
+            return null;
+        }
+
+        private User ConvertToUser(JToken userInfo)
+        {
+            return new User
+            {
+                Username = userInfo["kullanici_adi"]?.ToString(),
+                Name = userInfo["ad"]?.ToString(),
+                Surname = userInfo["soyad"]?.ToString(),
+                Email = userInfo["kurumsal_email_adresi"]?.ToString(),
+                Gender = userInfo["cinsiyet"]?.ToString(),
+                IsInInstitution = userInfo["kurum_ici"]?.ToString() == "TRUE",
+                IsStudent = userInfo["ogrenci"]?.ToString() == "TRUE",
+                IsAcademicPersonal = userInfo["akademik_personel"]?.ToString() == "TRUE",
+                IsAdministrativeStaff = userInfo["idari_personel"]?.ToString() == "TRUE",
+                UniqueId = userInfo["kimlik_no_unique_id"]?.ToString(),
+                SustainabilityPoint = null, // Eğer JSON'da sustainabilityPoint yoksa null bırakın
+                apiKey = null // Eğer API key yoksa burada bir değer bırakabilirsiniz
+            };
+        }
 
         // Step 3: Exchange the authorization code for an access token
         private async Task<string> ExchangeCodeForToken(string code, string codeVerifier)
