@@ -6,6 +6,7 @@ using CarSharingManagementSystem.Business.Services.Interfaces;
 using Newtonsoft.Json.Linq;
 using CarSharingManagementSystem.Entities;
 using CarSharingManagementSystem.HelperClasses;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -14,16 +15,18 @@ namespace CarSharingManagementSystem.Controllers
     public class OAuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMemoryCache _cache;
         private readonly string clientId = "FB387A2ABDDD423586FFB6ED157762BB";
         private readonly string clientSecret = "3FF64BC099174847A5FB2EF22E1D0930";
-        private readonly string redirectUri = "http://localhost:3000/auth";
+        private readonly string redirectUri = "http://localhost:3000/auth"; // Backend'inizin HTTP redirectUri'si
         private readonly string authorizationEndpoint = "https://kampus.gtu.edu.tr/oauth/yetki";
         private readonly string tokenEndpoint = "https://kampus.gtu.edu.tr/oauth/dogrulama";
         private readonly string queryServerAddress = "https://kampus.gtu.edu.tr/oauth/sorgulama";
 
-        public OAuthController(IUserService userService)
+        public OAuthController(IUserService userService, IMemoryCache cache)
         {
             _userService = userService;
+            _cache = cache;
         }
 
         [HttpGet("login")]
@@ -35,51 +38,47 @@ namespace CarSharingManagementSystem.Controllers
             var codeChallenge = GenerateCodeChallenge(codeVerifier);
 
             Console.WriteLine($"codeVerifier: {codeVerifier}");
-            Console.WriteLine($"Received State: {state}");
+            Console.WriteLine($"Generated State: {state}");
 
-            // Store values in cookies (client-side)
-            Response.Cookies.Append("state", state, new CookieOptions { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax });
-            Response.Cookies.Append("codeVerifier", codeVerifier, new CookieOptions { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax });
+            // Store state and codeVerifier in cache with state as the key
+            _cache.Set(state, new { codeVerifier }, TimeSpan.FromMinutes(10));
 
             // Construct authorization URL
             var authorizationUrl = $"{authorizationEndpoint}?response_type=code" +
-                                $"&client_id={clientId}" +
-                                $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-                                $"&state={state}" +
-                                $"&code_challenge_method=s256" +
-                                $"&code_challenge={codeChallenge}";
+                                   $"&client_id={clientId}" +
+                                   $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+                                   $"&state={state}" +
+                                   $"&code_challenge_method=s256" +
+                                   $"&code_challenge={codeChallenge}";
 
-            return Ok(authorizationUrl);
+            // Return authorizationUrl as a JSON object
+            return Ok(new { authorizationUrl });
         }
 
         [HttpGet("auth")]
-        public async Task<IActionResult> OAuthRedirect(string state, string code)
+        public async Task<IActionResult> OAuthRedirect([FromQuery(Name = "state")] string state, [FromQuery(Name = "code")] string code)
         {
-            // Retrieve values from cookies (client-side)
-            var storedState = Request.Cookies["state"];
-            var storedCodeVerifier = Request.Cookies["codeVerifier"];
+            Console.WriteLine($"Received state: {state}");
+            Console.WriteLine($"Received code: {code}");
 
-            Console.WriteLine($"Stored State: {storedState}");
-
-            if (storedState == null || storedCodeVerifier == null)
+            // Retrieve codeVerifier from cache using state as the key
+            if (!_cache.TryGetValue(state, out dynamic cacheEntry))
             {
-                return BadRequest("Missing state or codeVerifier.");
+                return BadRequest("Invalid or expired state.");
             }
 
-            if (state != storedState)
-            {
-                return BadRequest("Invalid state.");
-            }
+            string storedCodeVerifier = cacheEntry.codeVerifier;
 
-            Console.WriteLine($"codeVerifier: {storedCodeVerifier}");
+            // Remove the cache entry after retrieval
+            _cache.Remove(state);
 
             try
             {
-                // 1. Access token al
+                // 1. Exchange the authorization code for an access token
                 var accessToken = await ExchangeCodeForToken(code, storedCodeVerifier);
                 Console.WriteLine($"Access Token: {accessToken}");
 
-                // 2. Access token ile kullanıcı bilgilerini al
+                // 2. Use the access token to fetch user information
                 using (var httpClient = new HttpClient())
                 {
                     var requestData = new Dictionary<string, string>
@@ -91,7 +90,7 @@ namespace CarSharingManagementSystem.Controllers
 
                     var jsonData = JsonConvert.SerializeObject(requestData);
                     var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                    //var content = new FormUrlEncodedContent(requestData);
+
                     var response = await httpClient.PostAsync(queryServerAddress, content);
 
                     if (!response.IsSuccessStatusCode)
@@ -114,7 +113,7 @@ namespace CarSharingManagementSystem.Controllers
 
                     if (newUser == null)
                     {
-                        Console.WriteLine("Error ControlUser funciton");
+                        Console.WriteLine("Error in ControlUser function");
                         return BadRequest();
                     }
 
@@ -134,7 +133,7 @@ namespace CarSharingManagementSystem.Controllers
 
             var users = await _userService.GetAllAsync();
 
-            foreach(User user in users)
+            foreach (User user in users)
             {
                 if (user.Email == _user.Email)
                     return await _userService.GetUserByEmailAsync(_user.Email);
@@ -142,6 +141,7 @@ namespace CarSharingManagementSystem.Controllers
 
             _user.apiKey = ApiKeyGenerator.GenerateApiKey();
             _user.SustainabilityPoint = 0;
+            _user.UniqueId = _user.Email;
             await _userService.AddAsync(_user);
 
             var tempUser = await _userService.GetUserByEmailAsync(_user.Email);
@@ -189,9 +189,6 @@ namespace CarSharingManagementSystem.Controllers
 
                 // Prepare the content for the POST request (no need to manually add Content-Type header)
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                // Set the Content-Length header manually
-                content.Headers.Add("Content-Length", jsonData.Length.ToString());
 
                 // Send the POST request
                 var response = await httpClient.PostAsync(tokenEndpoint, content);
