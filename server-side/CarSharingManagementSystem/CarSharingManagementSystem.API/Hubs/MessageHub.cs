@@ -1,7 +1,8 @@
 using System.Collections.Concurrent;
 using CarSharingManagementSystem.Business.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
-using FirebaseAdmin.Messaging;
+using CarSharingManagementSystem.HelperClasses;
+using CarSharingManagementSystem.API.HelperClasses;
 
 namespace CarSharingManagementSystem.API.Hubs
 {
@@ -63,7 +64,8 @@ namespace CarSharingManagementSystem.API.Hubs
             else
             {
                 Console.WriteLine($"Alıcı {receiverId} bağlı değil.");
-                await SendNotification(receiverId, "Yeni Mesaj", message);
+                SendNotification sendNotificationService = new SendNotification(_userDeviceTokenService);
+                await sendNotificationService.SendNotificationFromFirebase(receiverId, "Yeni Mesaj", message);
 
                 await _messageService.AddAsync(new Entities.Message
                 {
@@ -74,49 +76,6 @@ namespace CarSharingManagementSystem.API.Hubs
                     Time = DateTime.UtcNow
                 });
             }
-        }
-
-        private async Task SendNotification(int receiverId, string title, string messageBody)
-        {
-            var deviceToken = await GetUserDeviceToken(receiverId);
-
-            if (string.IsNullOrEmpty(deviceToken))
-            {
-                Console.WriteLine($"Kullanıcı {receiverId} için cihaz token bulunamadı.");
-                return;
-            }
-
-            // Firebase mesajını oluştur
-            var message = new FirebaseAdmin.Messaging.Message()
-            {
-                Token = deviceToken,
-                Notification = new Notification()
-                {
-                    Title = title,
-                    Body = messageBody
-                },
-                Data = new Dictionary<string, string>()
-                {
-                    { "receiverId", receiverId.ToString() },
-                    { "message", messageBody }
-                }
-            };
-
-            try
-            {
-                // Firebase ile bildirimi gönder
-                var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                Console.WriteLine($"Bildirim gönderildi. Yanıt: {response}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Bildirim gönderme hatası: {ex.Message}");
-            }
-        }
-
-        private async Task<string> GetUserDeviceToken(int userId)
-        {
-            return await _userDeviceTokenService.GetDeviceTokenAsync(userId);
         }
     }
 }

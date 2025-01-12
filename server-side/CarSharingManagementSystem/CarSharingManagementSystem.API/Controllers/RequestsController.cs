@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using CarSharingManagementSystem.Entities;
 using CarSharingManagementSystem.Business.Services.Interfaces;
 using CarSharingManagementSystem.DataAccess.DTOs;
+using CarSharingManagementSystem.API.HelperClasses;
 
 namespace CarSharingManagementSystem.Controllers
 {
@@ -14,11 +15,13 @@ namespace CarSharingManagementSystem.Controllers
     {
         private readonly IRequestService _requestService;
         private readonly IUserService _userService;
+        private readonly IUserDeviceTokenService _userDeviceTokenService;
 
-        public RequestsController(IRequestService requestService, IUserService userService)
+        public RequestsController(IRequestService requestService, IUserService userService, IUserDeviceTokenService userDeviceTokenService)
         {
             _requestService = requestService;
             _userService = userService;
+            _userDeviceTokenService = userDeviceTokenService;
         }
 
         // GET: api/Request
@@ -63,6 +66,9 @@ namespace CarSharingManagementSystem.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, "Error creating request.");
                 }
 
+                SendNotification sendNotificationService = new SendNotification(_userDeviceTokenService);
+                await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "Bir yeni isteğiniz var.");
+
                 // Başarılı sonuç döndür
                 return CreatedAtAction(
                     nameof(GetRequestById), // İlgili bir GetById action metodu olmalı
@@ -98,6 +104,8 @@ namespace CarSharingManagementSystem.Controllers
                     return NotFound("Request not found.");
                 }
 
+                SendNotification sendNotificationService = new SendNotification(_userDeviceTokenService);
+
                 if (existingRequest.StatusId == 1 && request.StatusId == 2)
                 {
                     request.Sender.SustainabilityPoint += 10;
@@ -105,6 +113,12 @@ namespace CarSharingManagementSystem.Controllers
 
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
+
+                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Kabul Edildi.");
+                }
+                else if (existingRequest.StatusId == 1 && request.StatusId == 3)
+                {
+                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Reddedildi.");
                 }
                 else if (existingRequest.StatusId == 2 && request.StatusId == 3)
                 {
@@ -113,6 +127,8 @@ namespace CarSharingManagementSystem.Controllers
 
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
+
+                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Reddedildi.");
                 }
                 else if (existingRequest.StatusId == 3 && request.StatusId == 2)
                 {
@@ -121,6 +137,8 @@ namespace CarSharingManagementSystem.Controllers
 
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
+
+                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Kabul Edildi.");
                 }
 
                 // - Sender request attıysa ve sonrada daha hiç request e cevap gelmeden silerse request herkesten silinmelidir.
