@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'auth_service.dart';
 
 class MessageService {
   static const String _baseUrl = 'http://10.0.2.2:3000/api';
-  static const String _apiKey = 'api12324';
-  static const String _userID = '1';
+  static final String _apiKey = AuthService().apiKey ?? " ";
+  static final int _userID = AuthService().userId ?? -1;
 
   // Common headers for all requests
   static Map<String, String> get _headers => {
         'Content-Type': 'application/json',
         'x-api-key': _apiKey,
-        'user_id': _userID, // Adding user_id header
+        'user_id': _userID.toString(),
       };
 
   // Send a message

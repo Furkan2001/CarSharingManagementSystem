@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class JourneyUtils {
   // Get the closest date in the future for a given day of the week
   static DateTime getClosestDateForDay(int dayOfWeek) {
@@ -13,12 +11,6 @@ class JourneyUtils {
       now.day,
     ).add(Duration(days: daysToAdd));
 
-    // Debugging output
-    print('Current Date: $now');
-    print('Day of the Week: $dayOfWeek');
-    print('Days to Add: $daysToAdd');
-    print('Closest Date for Day $dayOfWeek: $closestDate');
-
     return closestDate;
   }
 
@@ -28,15 +20,8 @@ class JourneyUtils {
     final String timeString = journey['time'];
     final List<dynamic> journeyDays = journey['journeyDays'] ?? [];
 
-    // Debugging output
-    print('Journey Time String: $timeString');
-    print('Journey Days: $journeyDays');
-
     // Parse time from the journey's `time` field
     final DateTime journeyTime = DateTime.parse(timeString);
-
-    // Debugging output
-    print('Parsed Journey Time: $journeyTime');
 
     // Calculate possible dates based on journey days
     List<DateTime> possibleDates = journeyDays.map((day) {
@@ -52,19 +37,11 @@ class JourneyUtils {
         journeyTime.minute,
       );
 
-      // Debugging output for each journey day
-      print('Day ID: $dayId');
-      print('Closest Day: $closestDay');
-      print('Closest Day with Time: $closestDayWithTime');
-
       return closestDayWithTime;
     }).toList();
 
     // Sort the possible dates and return the earliest one in the future
     possibleDates.sort();
-
-    // Debugging output
-    print('Sorted Possible Dates: $possibleDates');
 
     final DateTime result = possibleDates.firstWhere(
       (date) => date.isAfter(DateTime.now()),
@@ -73,9 +50,6 @@ class JourneyUtils {
         return journeyTime;
       },
     );
-
-    // Debugging output
-    print('Selected Date to Show: $result');
 
     return result;
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_appbar.dart';
 import '../services/messages_service.dart'; // Import the MessageService
 import '../services/signal_r_service.dart';
+import '../services/auth_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String postOwnerName;
@@ -19,7 +20,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final SignalRService _signalRService = SignalRService();
   final TextEditingController _messageController = TextEditingController();
   final List<dynamic> _messages = [];
-  int userId = 1;
+  int userId = AuthService().userId ?? -1;
+
+  DateTime eventStart = DateTime.now();
+  DateTime eventEnd = DateTime.now();
 
   @override
   void initState() {
@@ -92,6 +96,8 @@ class _ChatScreenState extends State<ChatScreen> {
         });
 
         _messageController.clear(); // Clear the message input field
+
+        print("Message sent at ${DateTime.now()}");
       } catch (e) {
         print('Failed to send message: $e');
       }

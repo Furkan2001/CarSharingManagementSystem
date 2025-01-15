@@ -5,7 +5,8 @@ import '../widgets/custom_appbar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../services/posts_service.dart';
-import 'request_screen.dart'; // Ensure this is properly imported
+import 'request_screen.dart';
+import '../utils/journey_utils.dart';
 
 class YourPostsScreen extends StatefulWidget {
   const YourPostsScreen({Key? key}) : super(key: key);
@@ -17,6 +18,9 @@ class YourPostsScreen extends StatefulWidget {
 class _YourPostsScreenState extends State<YourPostsScreen> {
   List<dynamic> _yourPosts = [];
   bool _isLoading = true;
+
+  DateTime eventStart = DateTime.now();
+  DateTime eventEnd = DateTime.now();
 
   @override
   void initState() {
@@ -33,7 +37,8 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
     try {
       final journeys = await PostsService.getUsersJourneys();
       setState(() {
-        _yourPosts = journeys;
+        _yourPosts =
+            journeys.where((journey) => journey['mapId'] != null).toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -46,6 +51,8 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
 
   void _deletePost(int index) async {
     final post = _yourPosts[index];
+
+    eventStart = DateTime.now();
 
     try {
       await PostsService.deleteJourney(post['journeyId']);
@@ -61,6 +68,12 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
         const SnackBar(content: Text('Silme işlemi başarısız oldu.')),
       );
     }
+
+    eventEnd = DateTime.now();
+    Duration difference = eventEnd.difference(eventStart);
+    print("Delete button clicked at $eventStart\n"
+        "Post deleted at $eventEnd\n"
+        "Miliseconds deleting post: ${difference.inMilliseconds}");
   }
 
   @override
@@ -74,7 +87,15 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
             ? const Center(child: CircularProgressIndicator())
             : _yourPosts.isEmpty
                 ? const Center(
-                    child: Text('Henüz bir paylaşım oluşturmadınız.'),
+                    child: Text(
+                      'Henüz Paylaşım Oluşturmadınız',
+                      style: TextStyle(
+                        color: Colors.white, // White text color
+                        fontSize: 18.0, // Larger font size
+                        fontWeight:
+                            FontWeight.bold, // Optional for making it bold
+                      ),
+                    ),
                   )
                 : ListView.builder(
                     itemCount: _yourPosts.length,
@@ -86,17 +107,18 @@ class _YourPostsScreenState extends State<YourPostsScreen> {
                       final destinationDistrict =
                           post['map']?['destinationDistrict'] ?? 'Unknown';
 
-                      final timeString = post['time'] ?? 'N/A';
+                      // Compute dateToShow dynamically
+                      final DateTime dateToShow = post['isOneTime']
+                          ? DateTime.parse(
+                              post['time']) // Use time for one-time journeys
+                          : JourneyUtils.calculateDateForRecurringJourney(
+                              post); // Compute for recurring journeys
 
-                      String formattedTime;
-                      if (timeString != 'N/A') {
-                        final DateTime dateTime = DateTime.parse(timeString);
-                        final DateFormat formatter =
-                            DateFormat('dd MMMM yyyy HH:mm', 'tr');
-                        formattedTime = formatter.format(dateTime);
-                      } else {
-                        formattedTime = 'N/A';
-                      }
+                      // Format the computed date for display
+                      final DateFormat formatter =
+                          DateFormat('dd MMMM yyyy HH:mm', 'tr');
+                      final String formattedTime = formatter.format(dateToShow);
+                      final id = post['journeyId'] ?? -1;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(

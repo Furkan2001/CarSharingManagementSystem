@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
+import '../services/auth_service.dart';
 import 'map_screen.dart';
 
 class EditPostScreen extends StatefulWidget {
@@ -38,6 +38,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
   String? _encodedRoute; // To store the encoded route string
   List<LatLng> _routePoints = []; // To store decoded route points for display
+
+  int userId = AuthService().userId ?? -1;
+
+  DateTime eventStart = DateTime.now();
+  DateTime eventEnd = DateTime.now();
 
   final Map<String, bool> _selectedDays = {
     "Pazartesi": false,
@@ -126,7 +131,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
         _isOneTime = journey['isOneTime'];
         _mapId = journey['mapId'];
 
-        // Populate selected days based on journeyDays
         journey['journeyDays'].forEach((day) {
           final dayName = _getDayName(day['dayId']);
           if (dayName != null) {
@@ -148,6 +152,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
   }
 
   Future<void> _submitForm() async {
+    DateTime eventStart = DateTime.now();
     if (_formKey.currentState!.validate() && _selectedTime != null) {
       final updatedJourney = {
         "journeyId": widget.journeyId,
@@ -155,9 +160,9 @@ class _EditPostScreenState extends State<EditPostScreen> {
         "mapId": _mapId,
         "time": _selectedTime?.toIso8601String(),
         "isOneTime": _isOneTime,
-        "userId": 1,
+        "userId": userId,
         "map": {
-          "mapId": 0,
+          "mapId": _mapId,
           "destinationLatitude": _destinationLatitude,
           "destinationLongitude": _destinationLongitude,
           "departureLatitude": _departureLatitude,
@@ -190,6 +195,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
             const SnackBar(content: Text('Paylaşım güncellenemedi!')),
           );
         }
+        eventEnd = DateTime.now();
+        Duration difference = eventEnd.difference(eventStart);
+        print("Paylaşımı Düzenle button clicked at $eventStart\n"
+            "Post updated at $eventEnd\n"
+            "Miliseconds updating post: ${difference.inMilliseconds}");
       } catch (e) {
         print('Error updating journey: $e');
         ScaffoldMessenger.of(context).showSnackBar(

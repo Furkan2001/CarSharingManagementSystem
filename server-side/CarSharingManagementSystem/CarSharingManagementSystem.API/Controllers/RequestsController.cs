@@ -114,11 +114,11 @@ namespace CarSharingManagementSystem.Controllers
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
 
-                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Kabul Edildi.");
+                    await sendNotificationService.SendNotificationFromFirebase(request.SenderId, "İstek Bildirimi", "İstek Kabul Edildi.");
                 }
                 else if (existingRequest.StatusId == 1 && request.StatusId == 3)
                 {
-                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Reddedildi.");
+                    await sendNotificationService.SendNotificationFromFirebase(request.SenderId, "İstek Bildirimi", "İstek Reddedildi.");
                 }
                 else if (existingRequest.StatusId == 2 && request.StatusId == 3)
                 {
@@ -128,7 +128,7 @@ namespace CarSharingManagementSystem.Controllers
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
 
-                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Reddedildi.");
+                    await sendNotificationService.SendNotificationFromFirebase(request.SenderId, "İstek Bildirimi", "İstek Reddedildi.");
                 }
                 else if (existingRequest.StatusId == 3 && request.StatusId == 2)
                 {
@@ -138,7 +138,7 @@ namespace CarSharingManagementSystem.Controllers
                     await _userService.UpdateAsync(request.Sender);
                     await _userService.UpdateAsync(request.Receiver);
 
-                    await sendNotificationService.SendNotificationFromFirebase(request.ReceiverId, "İstek Bildirimi", "İstek Kabul Edildi.");
+                    await sendNotificationService.SendNotificationFromFirebase(request.SenderId, "İstek Bildirimi", "İstek Kabul Edildi.");
                 }
 
                 // - Sender request attıysa ve sonrada daha hiç request e cevap gelmeden silerse request herkesten silinmelidir.

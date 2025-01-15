@@ -4,6 +4,7 @@ import '../widgets/custom_appbar.dart';
 import '../widgets/menu_widget.dart';
 import 'chat_screen.dart';
 import 'package:intl/intl.dart';
+import '../services/auth_service.dart';
 
 class MessagesScreen extends StatefulWidget {
   @override
@@ -12,8 +13,7 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   List<dynamic> _endMessages = [];
-  int _currentUserId =
-      1; // Your logged-in user's ID, set this dynamically as needed
+  final int UserId = AuthService().userId ?? -1;
   bool _isLoading = true;
 
   @override
@@ -28,8 +28,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     });
 
     try {
-      var endMessages =
-          await MessageService.getEndMessagesForAPerson(_currentUserId);
+      var endMessages = await MessageService.getEndMessagesForAPerson(UserId);
       setState(() {
         _endMessages = endMessages;
       });
@@ -71,24 +70,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
               )
             : ListView.separated(
                 itemCount: _endMessages.length,
-                itemBuilder: (context, index) {
-                  final message = _endMessages[index];
-                  final isCurrentUserSender =
-                      message['senderId'] == _currentUserId;
+                itemBuilder: (context, indexa) {
+                  final message = _endMessages[indexa];
+                  final isCurrentUserSender = message['senderId'] == UserId;
                   final chatPartner = isCurrentUserSender
                       ? message['receiver']
                       : message['sender'];
                   final messageText = message['messageText'];
                   final time = message['time'];
-                  DateTime dateTime =
-                      DateTime.parse(time); // Parse the time string
-                  String formattedTime = DateFormat('HH:mm').format(
-                      dateTime); // Format the time to only include hours and minutes
+                  DateTime dateTime = DateTime.parse(time);
+                  String formattedTime = DateFormat('HH:mm').format(dateTime);
 
-                  // Check if the message is unread
-                  final bool isUnread =
-                      message['receiverId'] == _currentUserId &&
-                          message['isRead'] == false;
+                  final bool isUnread = message['receiverId'] == UserId &&
+                      message['isRead'] == false;
 
                   return ListTile(
                     leading: isUnread
@@ -98,11 +92,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
                               CircleAvatar(
                                 backgroundColor: Colors.grey[800],
                                 child: Text(
-                                  chatPartner['name'][0],
+                                  chatPartner['username'][0],
                                   style: const TextStyle(color: Colors.white),
                                 ),
                               ),
-                              Positioned(
+                              const Positioned(
                                 right: 0,
                                 child: CircleAvatar(
                                   radius: 6,
@@ -114,12 +108,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         : CircleAvatar(
                             backgroundColor: Colors.grey[800],
                             child: Text(
-                              chatPartner['name'][0],
+                              chatPartner['username'][0],
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
                     title: Text(
-                      '${chatPartner['name']} ${chatPartner['surname']}',
+                      '${chatPartner['username']}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(

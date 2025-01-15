@@ -1,8 +1,7 @@
-import 'dart:convert'; // For encoding JSON data
 import 'package:http/http.dart' as http; // For making HTTP requests
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart';
-import '../screens/messages_screen.dart';
+import 'auth_service.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
@@ -39,7 +38,8 @@ class FirebaseApi {
     print('Token: $fCMToken');
 
     if (fCMToken != null) {
-      await sendTokenToBackend(userId: 1, deviceToken: fCMToken);
+      await sendTokenToBackend(
+          userId: AuthService().userId ?? -1, deviceToken: fCMToken);
     }
 
     initPushNotifications();
@@ -49,6 +49,8 @@ class FirebaseApi {
     required int userId,
     required String deviceToken,
   }) async {
+    print("UserId");
+    print(userId);
     final String apiUrl =
         'http://10.0.2.2:3000/api/Users/save-device-token?userId=$userId&deviceToken=$deviceToken';
 

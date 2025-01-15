@@ -132,14 +132,22 @@ class _RequestPageState extends State<RequestPage> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _requests.isEmpty
-                ? const Center(child: Text('Bu paylaşım için istek yok.'))
+                ? const Center(
+                    child: Text(
+                      'Bu paylaşım için istek yok.',
+                      style: TextStyle(
+                        color: Colors.white, // White text color
+                        fontSize: 18.0, // Larger font size
+                        fontWeight:
+                            FontWeight.bold, // Optional for making it bold
+                      ),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: _requests.length,
                     itemBuilder: (context, index) {
                       final request = _requests[index];
-                      final senderName = request['sender']['name'] +
-                          " " +
-                          request['sender']['surname'];
+                      final senderName = request['sender']['username'];
                       var status = "beklemede";
 
                       if (request['statusId'] == 2) {

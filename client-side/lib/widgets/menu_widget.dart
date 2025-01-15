@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/auth_service.dart';
 
 class User {
-  final String firstName;
-  final String lastName;
+  final String userName;
   final int sustainabilityPoints;
 
   User({
-    required this.firstName,
-    required this.lastName,
+    required this.userName,
     required this.sustainabilityPoints,
   });
 
   // Factory constructor to create a User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      firstName: json['name'] ?? 'Name',
-      lastName: json['surname'] ?? 'Last Name',
+      userName: json['username'] ?? 'Name',
       sustainabilityPoints: json['sustainabilityPoint'] ?? 0,
     );
   }
@@ -36,8 +34,8 @@ class _MenuState extends State<Menu> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  final String _userId = "1"; // Example user ID
-  final String _apiKey = "api12324"; // Example API key
+  final int _userId = AuthService().userId ?? -1;
+  final String _apiKey = AuthService().apiKey ?? " ";
 
   @override
   void initState() {
@@ -52,10 +50,7 @@ class _MenuState extends State<Menu> {
     try {
       final response = await http.get(
         Uri.parse(apiUrl),
-        headers: {
-          'x-api-key': _apiKey,
-          'user_id': _userId,
-        },
+        headers: {'x-api-key': _apiKey, 'user_id': _userId.toString()},
       );
 
       if (response.statusCode == 200) {
@@ -186,7 +181,7 @@ class _MenuState extends State<Menu> {
           color: Color.fromARGB(255, 6, 30, 69),
         ),
         accountName: Text(
-          '${_user!.firstName} ${_user!.lastName}',
+          '${_user!.userName}',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         accountEmail: Text(
@@ -196,7 +191,7 @@ class _MenuState extends State<Menu> {
         currentAccountPicture: CircleAvatar(
           backgroundColor: Colors.white,
           child: Text(
-            _user!.firstName.isNotEmpty ? _user!.firstName[0] : 'U',
+            _user!.userName.isNotEmpty ? _user!.userName[0] : 'U',
             style: const TextStyle(fontSize: 24, color: Colors.blue),
           ),
         ),

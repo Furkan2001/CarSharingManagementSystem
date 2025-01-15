@@ -8,6 +8,7 @@ import '../services/posts_service.dart';
 import '../services/requests_service.dart';
 import 'chat_screen.dart';
 import '../widgets/custom_appbar.dart';
+import '../services/auth_service.dart';
 
 class PostScreen extends StatefulWidget {
   final int journeyId;
@@ -22,6 +23,8 @@ class _PostScreenState extends State<PostScreen> {
   Map<String, dynamic>? _journey;
   bool _isLoading = true;
   String? _existingRequestStatus = null;
+
+  int userId = AuthService().userId ?? -1;
 
   @override
   void initState() {
@@ -54,13 +57,9 @@ class _PostScreenState extends State<PostScreen> {
     }
   }
 
-  // This method will check if there's an existing request by the current user
   void _checkExistingRequest() {
-    int currentUserId =
-        1; // Implement this to fetch current user ID dynamically
-    var existingRequest = _journey?['requests']?.firstWhere(
-        (req) => req['senderId'] == currentUserId,
-        orElse: () => null);
+    var existingRequest = _journey?['requests']
+        ?.firstWhere((req) => req['senderId'] == userId, orElse: () => null);
 
     if (existingRequest != null) {
       setState(() {
@@ -74,7 +73,7 @@ class _PostScreenState extends State<PostScreen> {
     Map<String, dynamic> request = {
       "requestId": 0,
       "journeyId": widget.journeyId,
-      "senderId": 1,
+      "senderId": userId,
       "receiverId": _journey?['userId'],
       "time":
           DateTime.now().toIso8601String(), // Current time as the request time
@@ -110,7 +109,9 @@ class _PostScreenState extends State<PostScreen> {
     return Scaffold(
         appBar: const CustomAppBar(title: 'İlan Detayları'),
         body: Container(
-          color: const Color.fromARGB(255, 54, 69, 74),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: const Color.fromARGB(255, 54, 69, 74), // Background color
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Stack(
@@ -331,6 +332,11 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Widget _buildChatButton() {
+    // Check if the user is the owner of the journey
+    if (userId == _journey?['userId']) {
+      return const SizedBox.shrink(); // Return an empty widget
+    }
+
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
@@ -341,8 +347,9 @@ class _PostScreenState extends State<PostScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => ChatScreen(
-                    postOwnerName: _journey?['user']?['username'] ?? 'Unknown',
-                    receiverId: _journey?['userId'] ?? 0),
+                  postOwnerName: _journey?['user']?['username'] ?? 'Unknown',
+                  receiverId: _journey?['userId'] ?? 0,
+                ),
               ),
             );
           },
@@ -364,6 +371,11 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Widget _buildApplyButton() {
+    // Check if the user is the owner of the journey
+    if (userId == _journey?['userId']) {
+      return const SizedBox.shrink(); // Return an empty widget
+    }
+
     if (_existingRequestStatus == null) {
       return Align(
         alignment: Alignment.bottomRight,

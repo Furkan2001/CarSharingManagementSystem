@@ -3,6 +3,9 @@ import 'package:signalr_netcore/signalr_client.dart';
 class SignalRService {
   late HubConnection hubConnection;
 
+  DateTime eventStart = DateTime.now();
+  DateTime eventEnd = DateTime.now();
+
   Future<void> startConnection(String userId) async {
     // Base URL for the SignalR hub
     final url = 'http://10.0.2.2:3000/messageHub?user_id=$userId';
@@ -23,6 +26,7 @@ class SignalRService {
   }
 
   Future<void> sendMessage(int senderId, int receiverId, String message) async {
+    eventStart = DateTime.now();
     try {
       await hubConnection
           .invoke('SendMessage', args: [senderId, receiverId, message]);
@@ -30,6 +34,11 @@ class SignalRService {
     } catch (e) {
       print("Mesaj gönderim hatası: $e");
     }
+    eventEnd = DateTime.now();
+    Duration difference = eventEnd.difference(eventStart);
+    print("Send button clicked at $eventStart\n"
+        "Messaged send at $eventEnd\n"
+        "Miliseconds sending message: ${difference.inMilliseconds}");
   }
 
   void onReceiveMessage(

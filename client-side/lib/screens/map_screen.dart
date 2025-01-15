@@ -1,4 +1,4 @@
-import 'dart:async'; // Add this import for Completer
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,7 +9,8 @@ enum SelectionStep {
   selectingOrigin,
   originSelected,
   selectingDestination,
-  routeFetched,
+  destinationSelected,
+  selectingRoute,
 }
 
 class MapScreen extends StatefulWidget {
@@ -24,25 +25,25 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _destination;
   String? _originName;
   String? _destinationName;
-  String? _encodedPolyline;
 
   final String _apiKey = "AIzaSyCtTjLzchGpSEZHxTAgHVGBwQjwL4f9CVg";
 
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
+  List<Map<String, dynamic>> _alternativeRoutes = [];
+  int? _selectedRouteIndex;
 
   Completer<GoogleMapController> _mapController = Completer();
 
-  // To control the camera movement
   CameraPosition _initialCameraPosition =
       const CameraPosition(target: LatLng(40.8083, 29.3590), zoom: 10);
 
-  // Getter to retrieve the last selected location name
   String? get _lastSelectedLocationName {
-    if (_currentStep == SelectionStep.routeFetched) {
-      return _destinationName;
-    } else if (_currentStep == SelectionStep.originSelected) {
+    if (_currentStep == SelectionStep.selectingDestination ||
+        _currentStep == SelectionStep.destinationSelected) {
       return _originName;
+    } else if (_currentStep == SelectionStep.selectingRoute) {
+      return _destinationName;
     }
     return null;
   }
@@ -70,7 +71,6 @@ class _MapScreenState extends State<MapScreen> {
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
           ),
-          // Positioned card to show the last selected location
           if (_lastSelectedLocationName != null)
             Positioned(
               top: 10,
@@ -81,20 +81,38 @@ class _MapScreenState extends State<MapScreen> {
                 elevation: 4,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _lastSelectedLocationName!,
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  child: Text(
+                    _lastSelectedLocationName!,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
             ),
-          // Positioned button at the bottom for selection and confirmation
+          if (_currentStep == SelectionStep.selectingRoute)
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: Card(
+                elevation: 8,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _alternativeRoutes.length,
+                  itemBuilder: (context, index) {
+                    final route = _alternativeRoutes[index];
+                    return ListTile(
+                      title: Text('Rota ${index + 1}'),
+                      subtitle: Text(
+                          'Mesafe: ${route['distance']} - Süre: ${route['duration']}'),
+                      trailing: _selectedRouteIndex == index
+                          ? Icon(Icons.check, color: Colors.green)
+                          : null,
+                      onTap: () => _selectRoute(index),
+                    );
+                  },
+                ),
+              ),
+            ),
           Positioned(
             bottom: 16,
             left: 16,
@@ -109,7 +127,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // Determine the button label based on the current step
   String _buttonLabel() {
     switch (_currentStep) {
       case SelectionStep.selectingOrigin:
@@ -118,18 +135,18 @@ class _MapScreenState extends State<MapScreen> {
         return 'Başlangıç Onayla';
       case SelectionStep.selectingDestination:
         return 'Hedef Seç';
-      case SelectionStep.routeFetched:
-        return 'Konum ve Rota Onayla';
+      case SelectionStep.destinationSelected:
+        return 'Hedef Onayla';
+      case SelectionStep.selectingRoute:
+        return 'Rota Seç';
       default:
         return 'Seç';
     }
   }
 
-  // Handle button press based on the current step
   void _buttonAction() async {
     switch (_currentStep) {
       case SelectionStep.selectingOrigin:
-        // Next step is to confirm origin after selecting
         setState(() {
           _currentStep = SelectionStep.originSelected;
         });
@@ -140,25 +157,36 @@ class _MapScreenState extends State<MapScreen> {
             _currentStep = SelectionStep.selectingDestination;
           });
         } else {
-          // Handle error if origin is not selected
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Lütfen bir başlangıç noktası seçin.')),
-          );
+          _showSnackBar('Lütfen bir başlangıç noktası seçin.');
         }
         break;
       case SelectionStep.selectingDestination:
+        setState(() {
+          _currentStep = SelectionStep.destinationSelected;
+        });
         break;
-      case SelectionStep.routeFetched:
-        // Confirm and navigate back with data
-        _confirmSelections();
+      case SelectionStep.destinationSelected:
+        if (_destination != null) {
+          await _fetchRoute();
+          setState(() {
+            _currentStep = SelectionStep.selectingRoute;
+          });
+        } else {
+          _showSnackBar('Lütfen bir hedef seçin.');
+        }
+        break;
+      case SelectionStep.selectingRoute:
+        if (_selectedRouteIndex != null) {
+          _confirmSelections();
+        } else {
+          _showSnackBar('Lütfen bir rota seçin.');
+        }
         break;
       default:
         break;
     }
   }
 
-  // Handle map taps based on the current step
   Future<void> _handleMapTap(LatLng location) async {
     switch (_currentStep) {
       case SelectionStep.selectingOrigin:
@@ -166,7 +194,6 @@ class _MapScreenState extends State<MapScreen> {
         await _setOrigin(location);
         break;
       case SelectionStep.selectingDestination:
-      case SelectionStep.routeFetched:
         await _setDestination(location);
         break;
       default:
@@ -197,7 +224,6 @@ class _MapScreenState extends State<MapScreen> {
       _destination = location;
       _destinationName = null;
       _markers.removeWhere((m) => m.markerId.value == 'destination');
-      _polylines.clear();
     });
     _markers.add(
       Marker(
@@ -208,11 +234,6 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
     await _fetchLocationName(location, isOrigin: false);
-    // After setting destination, fetch the route automatically
-    await _fetchRoute();
-    setState(() {
-      _currentStep = SelectionStep.routeFetched;
-    });
   }
 
   Future<void> _fetchLocationName(LatLng location,
@@ -224,13 +245,7 @@ class _MapScreenState extends State<MapScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['results'] != null && data['results'].isNotEmpty) {
-          String locationName;
-          if (data['results'][0]['formatted_address'] != null) {
-            locationName = data['results'][0]['formatted_address'];
-          } else {
-            locationName = 'Unknown location';
-          }
-
+          String locationName = data['results'][0]['formatted_address'] ?? '';
           setState(() {
             if (isOrigin) {
               _originName = locationName;
@@ -238,147 +253,94 @@ class _MapScreenState extends State<MapScreen> {
               _destinationName = locationName;
             }
           });
-        } else {
-          setState(() {
-            if (isOrigin) {
-              _originName = 'Unknown location';
-            } else {
-              _destinationName = 'Unknown location';
-            }
-          });
         }
-      } else {
-        setState(() {
-          if (isOrigin) {
-            _originName = 'Failed to fetch location name';
-          } else {
-            _destinationName = 'Failed to fetch location name';
-          }
-        });
       }
     } catch (e) {
-      setState(() {
-        if (isOrigin) {
-          _originName = 'Error fetching location';
-        } else {
-          _destinationName = 'Error fetching location';
-        }
-      });
+      _showSnackBar('Konum ismi alınamadı.');
     }
   }
 
   Future<void> _fetchRoute() async {
-    // Check if both origin and destination names are available
-    if (_originName == null || _destinationName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Origin or destination name is not available.'),
-      ));
-      return;
-    }
-
-    print("Fetching route using location names");
-
-    // URL encode the location names to handle spaces and special characters
     final encodedOrigin = Uri.encodeComponent(_originName!);
     final encodedDestination = Uri.encodeComponent(_destinationName!);
-
-    // Construct the Directions API request URL using location names
     final url = Uri.parse(
       'https://maps.googleapis.com/maps/api/directions/json'
       '?origin=$encodedOrigin'
       '&destination=$encodedDestination'
+      '&alternatives=true'
       '&key=$_apiKey',
     );
 
-    print('Directions API Request URL: $url');
-
     try {
       final response = await http.get(url);
-      print('Directions API Response Status: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Directions API Response Data: $data');
-
         if (data['routes'] != null && data['routes'].isNotEmpty) {
-          final route = data['routes'][0];
-          final polyline = route['overview_polyline']['points'];
-          _addPolyline(polyline);
-        } else {
-          // Handle cases where no route is found
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('No route found: ${data['status']}'),
-          ));
-          print('No route found: ${data['status']}');
+          List<Map<String, dynamic>> routes = [];
+          data['routes'].forEach((route) {
+            routes.add({
+              'polyline': route['overview_polyline']['points'],
+              'distance': route['legs'][0]['distance']['text'],
+              'duration': route['legs'][0]['duration']['text'],
+            });
+          });
+          _displayAlternativeRoutes(routes);
         }
-      } else {
-        // Handle HTTP errors
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Failed to fetch route: ${response.statusCode}'),
-        ));
-        print(
-            'Failed to fetch route: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      // Handle exceptions such as network issues
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error fetching route: $e'),
-      ));
-      print('Exception while fetching route: $e');
+      _showSnackBar('Rota bilgisi alınamadı.');
     }
   }
 
-  void _addPolyline(String encodedPolyline) {
-    _encodedPolyline = encodedPolyline; // Store the encoded polyline
-
-    PolylinePoints polylinePoints = PolylinePoints();
-    List<PointLatLng> decodedPolyline =
-        polylinePoints.decodePolyline(encodedPolyline);
-
-    List<LatLng> polylineCoordinates = decodedPolyline
-        .map((point) => LatLng(point.latitude, point.longitude))
-        .toList();
-
-    setState(() {
-      _polylines.clear();
+  void _displayAlternativeRoutes(List<Map<String, dynamic>> routes) {
+    _polylines.clear();
+    List<Color> colors = [Colors.blue, Colors.green, Colors.orange, Colors.red];
+    for (int i = 0; i < routes.length; i++) {
+      final polyline = routes[i]['polyline'];
+      final decodedPolyline = PolylinePoints()
+          .decodePolyline(polyline)
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
       _polylines.add(
         Polyline(
-          polylineId: const PolylineId('route'),
-          points: polylineCoordinates,
-          color: Colors.blue,
+          polylineId: PolylineId('route_$i'),
+          points: decodedPolyline,
+          color: colors[i % colors.length],
           width: 5,
         ),
       );
-    });
-
-    _adjustCameraBounds(polylineCoordinates);
-  }
-
-  Future<void> _adjustCameraBounds(List<LatLng> polylineCoordinates) async {
-    if (polylineCoordinates.isEmpty) return;
-
-    double minLat = polylineCoordinates.first.latitude;
-    double maxLat = polylineCoordinates.first.latitude;
-    double minLng = polylineCoordinates.first.longitude;
-    double maxLng = polylineCoordinates.first.longitude;
-
-    for (var coord in polylineCoordinates) {
-      if (coord.latitude < minLat) minLat = coord.latitude;
-      if (coord.latitude > maxLat) maxLat = coord.latitude;
-      if (coord.longitude < minLng) minLng = coord.longitude;
-      if (coord.longitude > maxLng) maxLng = coord.longitude;
     }
-
-    LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
-
-    final GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+    setState(() {
+      _alternativeRoutes = routes;
+    });
   }
 
-  // Confirm selections and navigate back with data
+  void _selectRoute(int index) {
+    setState(() {
+      _selectedRouteIndex = index;
+
+      final updatedPolylines = <Polyline>{};
+      for (int i = 0; i < _alternativeRoutes.length; i++) {
+        final route = _alternativeRoutes[i];
+        final decodedPolyline = PolylinePoints()
+            .decodePolyline(route['polyline'])
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
+
+        updatedPolylines.add(
+          Polyline(
+            polylineId: PolylineId('route_$i'),
+            points: decodedPolyline,
+            color: i == index ? Colors.blueAccent : Colors.grey,
+            width: 5,
+          ),
+        );
+      }
+
+      _polylines = updatedPolylines;
+    });
+  }
+
   void _confirmSelections() {
     Navigator.pop(context, {
       'origin': {
@@ -395,12 +357,14 @@ class _MapScreenState extends State<MapScreen> {
         },
         'name': _destinationName,
       },
-      'route': _encodedPolyline ?? '', // Send the encoded polyline string
+      'route': _selectedRouteIndex != null
+          ? _alternativeRoutes[_selectedRouteIndex!]['polyline']
+          : '',
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

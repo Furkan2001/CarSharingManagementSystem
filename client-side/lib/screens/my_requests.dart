@@ -4,13 +4,13 @@ import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import '../services/auth_service.dart';
+import '../screens/post_screen.dart';
 
 import 'chat_screen.dart';
 
 class MyRequestsScreen extends StatefulWidget {
-  final int userId;
-
-  const MyRequestsScreen({Key? key, required this.userId}) : super(key: key);
+  const MyRequestsScreen({Key? key}) : super(key: key);
 
   @override
   _MyRequestsScreenState createState() => _MyRequestsScreenState();
@@ -20,6 +20,8 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
   bool _isLoading = true;
   List<dynamic> _myRequestsToOthers = [];
   List<dynamic> _othersRequestsToMe = [];
+
+  int userId = AuthService().userId ?? -1;
 
   @override
   void initState() {
@@ -34,13 +36,13 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
 
   Future<void> _fetchMyRequests() async {
     try {
-      final requests = await RequestsService.getMyRequests(widget.userId);
+      final requests = await RequestsService.getMyRequests(userId);
       if (requests != null) {
         setState(() {
           _myRequestsToOthers =
-              requests.where((r) => r['senderId'] == widget.userId).toList();
+              requests.where((r) => r['senderId'] == userId).toList();
           _othersRequestsToMe =
-              requests.where((r) => r['receiverId'] == widget.userId).toList();
+              requests.where((r) => r['receiverId'] == userId).toList();
           _isLoading = false;
         });
       } else {
@@ -223,16 +225,13 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ListTile(
-                              title: Text(
-                                  '${request['receiver']['name']} ${request['receiver']['surname']}'),
+                              title: Text('${request['receiver']['username']}'),
                               subtitle: Text(formattedTime),
                               trailing: Row(
-                                mainAxisSize: MainAxisSize
-                                    .min, // Ensure the Row fits its children
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ElevatedButton(
-                                    onPressed:
-                                        () {}, // Status button does not perform any action here
+                                    onPressed: () {},
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: _getStatusColor(
                                           request['status']['statusName']),
@@ -251,18 +250,26 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                                           const TextStyle(color: Colors.white),
                                     ),
                                   ),
-                                  const SizedBox(
-                                      width: 8), // Space between buttons
+                                  const SizedBox(width: 8),
                                   IconButton(
                                     icon: const Icon(Icons.delete,
                                         color: Colors.grey),
                                     onPressed: () => _deleteRequest(
-                                        request['requestId'],
-                                        true), // Outgoing request
+                                        request['requestId'], true),
                                   ),
                                 ],
                               ),
                               contentPadding: const EdgeInsets.all(16),
+                              onTap: () {
+                                // Navigate to the PostScreen with the journeyId
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PostScreen(
+                                        journeyId: request['journeyId']),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         );
@@ -304,7 +311,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                             ),
                             child: ListTile(
                               title: Text(
-                                  '${request['sender']['name']} ${request['sender']['surname']} ($status)'),
+                                  '${request['sender']['username']} ($status)'),
                               subtitle: Text(formattedTime),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -349,6 +356,16 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                                   ),
                                 ],
                               ),
+                              onTap: () {
+                                // Navigate to the PostScreen with the journeyId
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PostScreen(
+                                        journeyId: request['journeyId']),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         );

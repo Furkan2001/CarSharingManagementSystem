@@ -3,37 +3,105 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // For HTTP requests
 import 'package:webview_flutter/webview_flutter.dart'; // For navigating to the returned link in-app
 import '../widgets/custom_appbar.dart';
+import '../services/auth_service.dart';
 import 'vehicle_posts.dart';
+import '../services/local_db_service.dart';
+import '../services/firebase_service.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
-  void _handleLogin(BuildContext context) {
+  void _debugLogin(BuildContext context) async {
+    AuthService().setCredentials(1, 'api12324');
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const VehiclePostsScreen()),
     );
 
-    // TODO: Connect to backend authentication when ready
+    await FirebaseApi().initNotifications();
   }
 
-  Future<void> _loginViaApi(BuildContext context) async {
+  Future<void> _handleLogin(BuildContext context) async {
     const String apiUrl = 'http://10.0.2.2:3000/login';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
 
       if (response.statusCode == 200) {
-        final String redirectUrl = response.body;
-        print('Redirect URL: $redirectUrl');
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
 
-        // Navigate to the returned link using WebView
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WebViewScreen(url: redirectUrl),
-          ),
-        );
+        if (responseData.containsKey('authorizationUrl')) {
+          final String redirectUrl = responseData['authorizationUrl'];
+          print('Redirect URL: $redirectUrl');
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WebViewScreen(
+                url: redirectUrl,
+                onFinalRedirect: (authUrl) async {
+                  try {
+                    // Make an HTTP GET request to fetch the JSON from the final URL
+                    final response = await http.get(Uri.parse(authUrl));
+
+                    if (response.statusCode == 200) {
+                      // Parse the JSON response
+                      final Map<String, dynamic> responseData =
+                          jsonDecode(response.body);
+
+                      final int? userId = responseData['userId'];
+                      final String? apiKey = responseData['apiKey'];
+
+                      print(userId);
+                      print(apiKey);
+
+                      if (userId != null && apiKey != null) {
+                        AuthService().setCredentials(userId, apiKey);
+                        saveLoginInfo(userId.toString(), apiKey);
+                        await FirebaseApi().initNotifications();
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const VehiclePostsScreen(),
+                          ),
+                        );
+                      } else {
+                        // Handle case where userId or apiKey is missing
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Failed to retrieve user info.'),
+                          ),
+                        );
+                      }
+                    } else {
+                      // Handle non-200 status code
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'Error: Unable to fetch user info. Status: ${response.statusCode}'),
+                        ),
+                      );
+                    }
+                  } catch (error) {
+                    // Handle errors like network issues
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $error'),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          );
+        } else {
+          print('Field "authorizationUrl" not found in the response.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to log in. Please try again.')),
+          );
+        }
       } else {
         print(
             'Failed to get redirect URL. Status code: ${response.statusCode}');
@@ -60,9 +128,9 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => _handleLogin(context),
+              onPressed: () => _debugLogin(context),
               child: const Text(
-                'Gtü ile Giriş',
+                'Debug Login',
                 style: TextStyle(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
@@ -73,9 +141,9 @@ class LoginScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20), // Add some spacing between buttons
             ElevatedButton(
-              onPressed: () => _loginViaApi(context),
+              onPressed: () => _handleLogin(context),
               child: const Text(
-                'Login via API',
+                'Gtü Giriş',
                 style: TextStyle(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
@@ -93,8 +161,13 @@ class LoginScreen extends StatelessWidget {
 
 class WebViewScreen extends StatefulWidget {
   final String url;
+  final void Function(String finalUrl) onFinalRedirect;
 
-  const WebViewScreen({required this.url, Key? key}) : super(key: key);
+  const WebViewScreen({
+    required this.url,
+    required this.onFinalRedirect,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<WebViewScreen> createState() => _WebViewScreenState();
@@ -108,6 +181,17 @@ class _WebViewScreenState extends State<WebViewScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (navigationRequest) {
+            if (navigationRequest.url.startsWith('http://10.0.2.2:3000/auth')) {
+              widget.onFinalRedirect(navigationRequest.url);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
       ..loadRequest(Uri.parse(widget.url));
   }
 

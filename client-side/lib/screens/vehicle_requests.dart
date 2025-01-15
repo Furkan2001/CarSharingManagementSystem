@@ -6,6 +6,8 @@ import '../services/posts_service.dart';
 import '../widgets/menu_widget.dart';
 import '../widgets/custom_appbar.dart';
 import '../screens/post_screen.dart';
+import '../services/auth_service.dart';
+import '../utils/journey_utils.dart';
 
 class VehicleRequestsScreen extends StatefulWidget {
   const VehicleRequestsScreen({Key? key}) : super(key: key);
@@ -20,10 +22,13 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
   bool _isLoading = true;
   String _searchQuery = '';
 
-  final FocusNode _searchFocusNode =
-      FocusNode(); // FocusNode for the search bar
-  final TextEditingController _searchController =
-      TextEditingController(); // Controller for the search bar
+  // Tarih filtresi için kullanacağımız değişkenler
+  DateTime? _filterStartTime;
+  DateTime? _filterEndTime;
+
+  final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  int userId = AuthService().userId ?? -1;
 
   @override
   void initState() {
@@ -34,7 +39,6 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
 
   @override
   void dispose() {
-    // Dispose of the FocusNode and TextEditingController when no longer needed
     _searchFocusNode.dispose();
     _searchController.dispose();
     super.dispose();
@@ -44,24 +48,70 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
     await initializeDateFormatting('tr', null);
   }
 
+  /// Sayfa açıldığında veri çekme
   Future<void> _fetchJourneys() async {
     try {
-      int currentUserId = 1;
+      setState(() {
+        _isLoading = true;
+      });
       final journeys = await PostsService.getAllJourneys();
+
+      // mapId == null olanları ve hasVehicle == true olanları
+      // ekranda istemiyoruz. Ayrıca userId eşleşen kayıtlar da listede olmayacak.
       setState(() {
         _journeys = journeys
             .where((journey) =>
                 journey['hasVehicle'] == false &&
-                journey['userId'] != currentUserId)
+                journey['userId'] != userId &&
+                journey['mapId'] != null)
             .toList();
         _filteredJourneys = _journeys;
         _isLoading = false;
       });
     } catch (e) {
       print('Error fetching journeys: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
+  /// Sunucuya filtre POST isteği
+  Future<void> _applyFilter() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // Bu örnekte hasVehicle değerini null gönderiyoruz (yok kabul ediyoruz).
+      // İsterseniz 'false' olarak gönderebilirsiniz (server logic’inize bağlı).
+      final filteredResult = await PostsService.filterJourneys(
+        startTime: _filterStartTime,
+        endTime: _filterEndTime,
+        hasVehicle: null, // Sadece tarih bazlı filtre
+      );
+
+      // Gelen sonuçları da ayrıca hasVehicle == false, mapId != null, userId != me
+      // koşullarına göre filtreliyoruz.
+      setState(() {
+        _journeys = filteredResult
+            .where((journey) =>
+                journey['hasVehicle'] == false &&
+                journey['userId'] != userId &&
+                journey['mapId'] != null)
+            .toList();
+
+        _filteredJourneys = _journeys;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error filtering journeys: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Client-side arama
   void _filterJourneys(String query) {
     setState(() {
       _searchQuery = query.toLowerCase();
@@ -79,13 +129,13 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Araç Paylaşımları'),
+      appBar: const CustomAppBar(title: 'Araç Talebi Paylaşımları'),
       drawer: const Menu(),
       body: Container(
         color: const Color.fromARGB(255, 54, 69, 74),
         child: Column(
           children: [
-            _buildSearchBar(), // Keeps the search bar outside the rebuilds
+            _buildSearchAndFilterRow(),
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -93,23 +143,21 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
                       itemCount: _filteredJourneys.length,
                       itemBuilder: (context, index) {
                         final journey = _filteredJourneys[index];
-
                         final currentDistrict =
                             journey['map']?['currentDistrict'] ?? 'Unknown';
                         final destinationDistrict =
                             journey['map']?['destinationDistrict'] ?? 'Unknown';
 
-                        final timeString = journey['time'] ?? 'N/A';
+                        // Tarih hesaplama (tek seferlik veya düzenli)
+                        final DateTime dateToShow = journey['isOneTime']
+                            ? DateTime.parse(journey['time'])
+                            : JourneyUtils.calculateDateForRecurringJourney(
+                                journey);
 
-                        String formattedTime;
-                        if (timeString != 'N/A') {
-                          final DateTime dateTime = DateTime.parse(timeString);
-                          final DateFormat formatter =
-                              DateFormat('dd MMMM yyyy HH:mm', 'tr');
-                          formattedTime = formatter.format(dateTime);
-                        } else {
-                          formattedTime = 'N/A';
-                        }
+                        final DateFormat formatter =
+                            DateFormat('dd MMMM yyyy HH:mm', 'tr');
+                        final String formattedTime =
+                            formatter.format(dateToShow);
 
                         final id = journey['journeyId'] ?? -1;
 
@@ -118,7 +166,7 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
                               horizontal: 16.0, vertical: 8.0),
                           child: Card(
                             elevation: 4,
-                            color: const Color.fromARGB(255, 255, 255, 255),
+                            color: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
@@ -252,26 +300,132 @@ class _VehicleRequestsScreenState extends State<VehicleRequestsScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  /// Arama çubuğu + Filtre butonu aynı satırda
+  Widget _buildSearchAndFilterRow() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: TextField(
-        focusNode: _searchFocusNode,
-        controller: _searchController,
-        onChanged: _filterJourneys,
-        style: const TextStyle(color: Colors.black),
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          hintText: 'Başlangıç veya Hedef Ara',
-          hintStyle: const TextStyle(color: Colors.grey),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
+      child: Row(
+        children: [
+          // Arama Kutusu
+          Expanded(
+            child: TextField(
+              focusNode: _searchFocusNode,
+              controller: _searchController,
+              onChanged: _filterJourneys,
+              style: const TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintText: 'Başlangıç veya Hedef Ara',
+                hintStyle: const TextStyle(color: Colors.grey),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          // Filtre Butonu
+          IconButton(
+            icon: const Icon(Icons.filter_list, color: Colors.white),
+            onPressed: _showFilterDialog,
+            tooltip: 'Filtrele',
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Tarih filtresi diyaloğu
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // Dialog içindeki setState'i yönetmek için StatefulBuilder kullanıyoruz
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Filtre Uygula'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Başlangıç Tarihi
+                    ListTile(
+                      title: const Text('Başlangıç Tarihi'),
+                      subtitle: Text(
+                        _filterStartTime != null
+                            ? DateFormat('dd MMM yyyy')
+                                .format(_filterStartTime!)
+                            : 'Seçilmedi',
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.date_range),
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _filterStartTime ?? now,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            setStateDialog(() {
+                              _filterStartTime = picked;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    // Bitiş Tarihi
+                    ListTile(
+                      title: const Text('Bitiş Tarihi'),
+                      subtitle: Text(
+                        _filterEndTime != null
+                            ? DateFormat('dd MMM yyyy').format(_filterEndTime!)
+                            : 'Seçilmedi',
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.date_range),
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _filterEndTime ?? now,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            setStateDialog(() {
+                              _filterEndTime = picked;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Vazgeç'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                ElevatedButton(
+                  child: const Text('Uygula'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Filtre POST isteği
+                    _applyFilter();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

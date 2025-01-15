@@ -7,6 +7,7 @@ import '../widgets/custom_appbar.dart';
 import 'map_screen.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../services/auth_service.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({Key? key}) : super(key: key);
@@ -29,8 +30,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? _destinationLatitude;
   String? _destinationLongitude;
 
+  int userId = AuthService().userId ?? -1;
+
   String? _encodedRoute; // To store the encoded route string
   List<LatLng> _routePoints = []; // To store decoded route points for display
+
+  DateTime eventStart = DateTime.now();
+  DateTime eventEnd = DateTime.now();
 
   final Map<String, bool> _selectedDays = {
     "Pazartesi": false,
@@ -134,14 +140,31 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate() && _selectedTime != null) {
+    eventStart = DateTime.now();
+
+    if (_formKey.currentState!.validate()) {
+      // Check if the user has selected a date and time
+      if (_selectedTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Lütfen kalkış saati seçin!',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor:
+                Colors.red, // Optional: Highlight with a red background
+          ),
+        );
+        return; // Exit the function if the date and time are not selected
+      }
+
       final newJourney = {
         "journeyId": 0,
         "hasVehicle": _hasVehicle,
         "mapId": 0,
         "time": _selectedTime?.toIso8601String(),
         "isOneTime": _isOneTime,
-        "userId": 1,
+        "userId": userId,
         "map": {
           "mapId": 0,
           "destinationLatitude": _destinationLatitude,
@@ -189,6 +212,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             const SnackBar(content: Text('Paylaşım oluşturulamadı!')),
           );
         }
+        eventEnd = DateTime.now();
+        Duration difference = eventEnd.difference(eventStart);
+        print("Paylaşım oluştur button clicked at $eventStart\n"
+            "Post created at $eventEnd\n"
+            "Milliseconds creating post: ${difference.inMilliseconds}");
       } catch (e) {
         print('Error creating journey: $e');
         ScaffoldMessenger.of(context).showSnackBar(
