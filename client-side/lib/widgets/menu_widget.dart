@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
+import '../utils/main_link.dart';
 
 class User {
   final String userName;
@@ -44,8 +45,9 @@ class _MenuState extends State<Menu> {
   }
 
   Future<void> _fetchUserData() async {
+    final String link = MainLink().url;
     final String apiUrl =
-        'http://10.0.2.2:3000/api/Users/get-user/$_userId'; // Adjusted for Android emulator
+        'http://$link:3000/api/Users/get-user/$_userId'; // Adjusted for Android emulator
 
     try {
       final response = await http.get(

@@ -130,6 +130,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
         _hasVehicle = journey['hasVehicle'];
         _isOneTime = journey['isOneTime'];
         _mapId = journey['mapId'];
+        _departureLatitude = journey['map']?['departureLatitude'];
+        _departureLongitude = journey['map']?['departureLongitude'];
+        _destinationLatitude = journey['map']?['destinationLatitude'];
+        _destinationLongitude = journey['map']?['destinationLongitude'];
+        _encodedRoute = journey['map']?['mapRoute'];
 
         journey['journeyDays'].forEach((day) {
           final dayName = _getDayName(day['dayId']);

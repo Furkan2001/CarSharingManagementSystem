@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http; // For making HTTP requests
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart';
 import 'auth_service.dart';
+import '../utils/main_link.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
@@ -14,7 +15,11 @@ class FirebaseApi {
 
   void handleMessage(RemoteMessage? Message) {
     if (Message == null) return;
-    navigatorKey.currentState?.pushNamed('/messages');
+    if (Message.notification?.title == "İstek Bildirimi") {
+      navigatorKey.currentState?.pushNamed('/my_requests');
+    } else {
+      navigatorKey.currentState?.pushNamed('/messages');
+    }
   }
 
   Future initPushNotifications() async {
@@ -51,8 +56,9 @@ class FirebaseApi {
   }) async {
     print("UserId");
     print(userId);
+    final String link = MainLink().url;
     final String apiUrl =
-        'http://10.0.2.2:3000/api/Users/save-device-token?userId=$userId&deviceToken=$deviceToken';
+        'http://$link:3000/api/Users/save-device-token?userId=$userId&deviceToken=$deviceToken';
 
     try {
       final response = await http.post(

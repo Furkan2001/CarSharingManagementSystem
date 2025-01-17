@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import '../utils/main_link.dart';
 
 class PostsService {
-  static const String _baseUrl = 'http://10.0.2.2:3000/api';
+  static final String link = MainLink().url;
+  static String _baseUrl = 'http://$link:3000/api';
   static final String _apiKey = AuthService().apiKey ?? " ";
   static final int _userID = AuthService().userId ?? -1;
 

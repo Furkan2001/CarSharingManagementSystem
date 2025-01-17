@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import 'vehicle_posts.dart';
 import '../services/local_db_service.dart';
 import '../services/firebase_service.dart';
+import '../utils/main_link.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -23,7 +24,8 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<void> _handleLogin(BuildContext context) async {
-    const String apiUrl = 'http://10.0.2.2:3000/login';
+    final String link = MainLink().url;
+    final String apiUrl = 'http://$link:3000/login';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -184,7 +186,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (navigationRequest) {
-            if (navigationRequest.url.startsWith('http://10.0.2.2:3000/auth')) {
+            final String link = MainLink().url;
+            if (navigationRequest.url.startsWith('http://$link:3000/auth')) {
               widget.onFinalRedirect(navigationRequest.url);
               return NavigationDecision.prevent;
             }

@@ -1,14 +1,16 @@
 import 'package:signalr_netcore/signalr_client.dart';
+import '../utils/main_link.dart';
 
 class SignalRService {
   late HubConnection hubConnection;
+  static final String link = MainLink().url;
 
   DateTime eventStart = DateTime.now();
   DateTime eventEnd = DateTime.now();
 
   Future<void> startConnection(String userId) async {
     // Base URL for the SignalR hub
-    final url = 'http://10.0.2.2:3000/messageHub?user_id=$userId';
+    final url = 'http://$link:3000/messageHub?user_id=$userId';
 
     hubConnection = HubConnectionBuilder().withUrl(url).build();
 

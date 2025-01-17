@@ -90,7 +90,8 @@ class _MapScreenState extends State<MapScreen> {
             ),
           if (_currentStep == SelectionStep.selectingRoute)
             Positioned(
-              bottom: 16,
+              bottom:
+                  80, // Moved the route selection card higher (adjusted from 16)
               left: 16,
               right: 16,
               child: Card(

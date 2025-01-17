@@ -19,6 +19,8 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final SignalRService _signalRService = SignalRService();
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController =
+      ScrollController(); // Add ScrollController
   final List<dynamic> _messages = [];
   int userId = AuthService().userId ?? -1;
 
@@ -46,10 +48,11 @@ class _ChatScreenState extends State<ChatScreen> {
             'timestamp': timestamp,
           };
 
-          // Update the UI
           setState(() {
             _messages.add(newMessage);
           });
+
+          _scrollToBottom(); // Scroll to bottom when a new message is received
         }
       });
     } catch (e) {
@@ -59,7 +62,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadMessages() async {
     try {
-      // Fetch server messages
       final serverMessages =
           await MessageService.getMessageHistory(userId, widget.receiverId);
 
@@ -67,19 +69,20 @@ class _ChatScreenState extends State<ChatScreen> {
         _messages.clear();
         _messages.addAll(serverMessages);
       });
+
+      // Scroll to the bottom after loading messages
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     } catch (e) {
       print('Error loading messages: $e');
     }
   }
 
-  /// Send a message using SignalR
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isNotEmpty) {
       final messageText = _messageController.text.trim();
       final timestamp = DateTime.now().toIso8601String();
 
       try {
-        // Send message via SignalR
         await _signalRService.sendMessage(
             userId, widget.receiverId, messageText);
 
@@ -90,12 +93,12 @@ class _ChatScreenState extends State<ChatScreen> {
           'timestamp': timestamp,
         };
 
-        // Update the chat UI
         setState(() {
           _messages.add(newMessage);
         });
 
-        _messageController.clear(); // Clear the message input field
+        _messageController.clear(); // Clear the input field
+        _scrollToBottom(); // Scroll to bottom after sending the message
 
         print("Message sent at ${DateTime.now()}");
       } catch (e) {
@@ -104,9 +107,20 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.dispose(); // Dispose of the ScrollController
     _signalRService.stopConnection();
     super.dispose();
   }
@@ -121,6 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
               child: ListView.builder(
+                controller: _scrollController, // Attach ScrollController
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
