@@ -16,8 +16,8 @@ namespace CarSharingManagementSystem.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMemoryCache _cache;
-        private readonly string clientId = "FB387A2ABDDD423586FFB6ED157762BB";
-        private readonly string clientSecret = "3FF64BC099174847A5FB2EF22E1D0930";
+        private readonly string clientId = "...";
+        private readonly string clientSecret = "...";
         private readonly string redirectUri = "http://localhost:3000/auth"; // Backend'inizin HTTP redirectUri'si
         private readonly string authorizationEndpoint = "https://kampus.gtu.edu.tr/oauth/yetki";
         private readonly string tokenEndpoint = "https://kampus.gtu.edu.tr/oauth/dogrulama";
